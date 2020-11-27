@@ -4,7 +4,6 @@ const BigNumber = require("bignumber.js");
 const { returnDecimals, getTokenPricesFromString } = require("./helper/utils");
 const pieABI = require("./config/piedao/abi/IPie.json");
 const erc20ABI = require("./config/piedao/abi/ERC20.json");
-
 const env = require('dotenv').config()
 const web3 = new Web3(new Web3.providers.HttpProvider(`https://mainnet.infura.io/v3/${env.parsed.INFURA_KEY}`));
 
@@ -79,21 +78,21 @@ async function fetch() {
 
     async function pushTokenAmount(token, amount) {
         if(tokenAmounts[token] == undefined) {
-    
+
             //create empty object
             tokenAmounts[token] = {
                 decimals: 0,
                 amount: 0,
                 price: 0
             }
-    
+
             const decimals = await returnDecimals(token);
             const price = (await getTokenPricesFromString(token)).data[token.toLowerCase()].usd;
-    
+
             tokenAmounts[token].decimals = decimals;
             tokenAmounts[token].price = price;
         }
-    
+
         tokenAmounts[token].amount += ((new BigNumber(amount)).div(10 ** tokenAmounts[token].decimals)).toNumber();
     }
 
@@ -116,10 +115,10 @@ async function fetch() {
         const stakingPool = stakingPools[stakingPoolAddress];
 
         const lp = new web3.eth.Contract(erc20ABI, stakingPool.lp);
-        
+
         const lpBalance = new BigNumber(await lp.methods.balanceOf(stakingPoolAddress).call());
         const lpTotalSupply = new BigNumber(await lp.methods.totalSupply().call());
-        
+
         if(stakingPool.lpType == "balancer") {
             for(const underlying of stakingPool.underlyings) {
 
@@ -143,7 +142,7 @@ async function fetch() {
         nav += tokenAmount.amount * tokenAmount.price;
     }
 
-    return nav; 
+    return nav;
 }
 
 module.exports = {
