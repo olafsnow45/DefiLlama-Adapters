@@ -13,7 +13,7 @@ const CETH = require('./config/mantra-dao/CETH.json');
 async function fetch() {
 
     try {
-        
+
         var price_feed = await retry(async bail => await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,tether,usd-coin,wrapped-bitcoin,dai,cream,chainlink,mantra-dao,rio-defi,compound-governance-token&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true'))
 
         // Helper to get lending supply
@@ -59,18 +59,18 @@ async function fetch() {
             ['0x27d15446176b469ee7fbdec1e5a4b506fd77c0cd', 'chainlink']
         ]
 
-        const stakingAssetCalc = Promise.all(stakingAssets.map(async (asset) => {
+         let stakingAssetCalc = await Promise.all(stakingAssets.map(async (asset) => {
             try {
                 let balance = await utils.returnBalance(asset.token, asset.contract);
-                console.log(balance)
+                //console.log(balance)
                 tvl += (parseFloat(balance) * price_feed.data[asset.price].usd)
             } catch (error) {
-                console.log(error)
-            } 
+                //console.log(error)
+            }
         }))
-        
-        
-        const ETHlendingCalc = new Promise(async (resolve, reject) => {
+
+
+         let ETHlendingCalc = await new Promise(async (resolve, reject) => {
             // ZEN ETH - Lending ETH
             var contract = '0x4f905f75f5576228ed2d0ea508fb0c32a0696090';
             var token = '0x4f905f75f5576228ed2d0ea508fb0c32a0696090';
@@ -78,8 +78,8 @@ async function fetch() {
             tvl += (parseFloat(balance) * price_feed.data['ethereum'].usd)
             resolve(0)
         })
-        
-        const ERC20lendingCalc = Promise.all(zenErc20.map(async (asset) => {
+
+        let zeen  = await Promise.all(zenErc20.map(async (asset) => {
             try {
                 // ZEN erc lending assets
                 var contract = asset[0];
@@ -87,26 +87,26 @@ async function fetch() {
                 balance = await returnSupply(token, contract, CERC);
                 tvl += (parseFloat(balance) * price_feed.data[asset[1]].usd)
             } catch (error) {
-                console.log(error)
-            } 
+                //console.log(error)
+            }
         }))
 
-        Promise.all([stakingAssetCalc, ETHlendingCalc, ERC20lendingCalc]).then((values) => {
-            console.log(tvl)
-            return tvl;
-        });
-        
+        return tvl;
+
+        // Promise.all([stakingAssetCalc, ETHlendingCalc, ERC20lendingCalc]).then((values) => {
+        //     console.log('tvl',tvl)
+        //     return tvl;
+        // });
+
     } catch (error) {
-        console.log(error)
+        //console.log(error)
     }
+
+
+
 }
 
-fetch();
 
 module.exports = {
   fetch
 }
-
-
-
-
