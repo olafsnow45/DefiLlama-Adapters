@@ -5,8 +5,8 @@ const utils = require('./helper/utils');
 *
 *****************/
 async function fetch() {
-  const tvl = await utils.fetchURL('https://api.wing.finance/wing/governance/tvl')
-  return tvl.data;
+  let tvl = await utils.fetchURL('https://api.yearn.tools/tvl')
+  return tvl.data.TvlUSD;
 }
 
 module.exports = {
