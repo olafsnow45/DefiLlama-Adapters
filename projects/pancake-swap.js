@@ -4,9 +4,10 @@ const utils = require('./helper/utils');
 * ==> Correct adapter needs to be created.
 *
 *****************/
+
 async function fetch() {
-  let staked = await utils.fetchURL('https://api.bt.finance/api/stats')
-  return staked.data.data.totalLockedValue;
+  let response = await utils.fetchURL('https://api.pancakeswap.finance/api/v1/stat')
+  return response.data.total_value_locked_all;
 }
 
 module.exports = {
