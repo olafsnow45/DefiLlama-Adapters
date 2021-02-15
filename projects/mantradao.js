@@ -13,13 +13,8 @@ const CETH = require('./config/mantra-dao/CETH.json');
 async function fetch() {
 
     try {
-<<<<<<< HEAD
-
-        var price_feed = await retry(async bail => await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,tether,usd-coin,wrapped-bitcoin,dai,cream,chainlink,mantra-dao,rio-defi,compound-governance-token&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true'))
-=======
         
         var price_feed = await retry(async bail => await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,tether,usd-coin,wrapped-bitcoin,dai,cream,chainlink,mantra-dao,rio-defi,compound-governance-token,aave,uniswap,sushi,havven,yearn-finance,dynamic-set-dollar,bondly,polkastarter,1inch,reserve-rights-token,royale,ftx-token,serum,balancer,curve-dao-token,uma,thorchain-erc20,frax,hegic,rhegic,88mph,zlot,zhegic,whiteheart,wrapped-nxm,renbtc,bancor,kyber-network,celsius-degree-token,cornichon,api3,matic-network,bao-finance,terrausd&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true'))
->>>>>>> f7c781fdb106b34f0d09c793594e769033bbfdbb
 
         // Helper to get lending supply
         async function returnSupply(token, address, abi) {
@@ -133,18 +128,18 @@ async function fetch() {
             ['0xaB576bCBB0C3303C9e680fbFDeCa67e062eAE59c', 'terrausd'],
         ]
 
-         let stakingAssetCalc = await Promise.all(stakingAssets.map(async (asset) => {
+        const stakingAssetCalc = Promise.all(stakingAssets.map(async (asset) => {
             try {
                 let balance = await utils.returnBalance(asset.token, asset.contract);
-                //console.log(balance)
+                console.log(balance)
                 tvl += (parseFloat(balance) * price_feed.data[asset.price].usd)
             } catch (error) {
-                //console.log(error)
-            }
+                console.log(error)
+            } 
         }))
-
-
-         let ETHlendingCalc = await new Promise(async (resolve, reject) => {
+        
+        
+        const ETHlendingCalc = new Promise(async (resolve, reject) => {
             // ZEN ETH - Lending ETH
             var contract = '0x4f905f75f5576228ed2d0ea508fb0c32a0696090';
             var token = '0x4f905f75f5576228ed2d0ea508fb0c32a0696090';
@@ -152,8 +147,8 @@ async function fetch() {
             tvl += (parseFloat(balance) * price_feed.data['ethereum'].usd)
             resolve(0)
         })
-
-        let zeen  = await Promise.all(zenErc20.map(async (asset) => {
+        
+        const ERC20lendingCalc = Promise.all(zenErc20.map(async (asset) => {
             try {
                 // ZEN erc lending assets
                 var contract = asset[0];
@@ -163,26 +158,26 @@ async function fetch() {
                 console.log(price_feed.data[asset[1]])
                 tvl += (parseFloat(balance) * price_feed.data[asset[1]].usd)
             } catch (error) {
-                //console.log(error)
-            }
+                console.log(error)
+            } 
         }))
 
-        return tvl;
-
-        // Promise.all([stakingAssetCalc, ETHlendingCalc, ERC20lendingCalc]).then((values) => {
-        //     console.log('tvl',tvl)
-        //     return tvl;
-        // });
-
+        Promise.all([stakingAssetCalc, ETHlendingCalc, ERC20lendingCalc]).then((values) => {
+            console.log(tvl)
+            return tvl;
+        });
+        
     } catch (error) {
-        //console.log(error)
+        console.log(error)
     }
-
-
-
 }
 
+fetch();
 
 module.exports = {
   fetch
 }
+
+
+
+
