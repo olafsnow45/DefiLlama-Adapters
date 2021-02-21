@@ -44,20 +44,6 @@ async function getPrices(object) {
     return await retry(async bail => await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${stringFetch}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true`))
 }
 
-async function getPricesFromContract(object) {
-  var contractFetch = ''
-  for (var key in object) {
-    if (object[key]) {
-      if (contractFetch.length > 0) {
-        contractFetch = contractFetch + ',' + object[key];
-      } else {
-        contractFetch = object[key];
-      }
-    }
-  }
-  return await retry(async bail => await axios.get(`https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${contractFetch}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true`))
-}
-
 async function getPricesfromString(stringFeed) {
   return await retry(async bail => await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${stringFeed}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true`))
 }
@@ -99,6 +85,5 @@ module.exports = {
   returnBalance,
   returnBlock,
   returnDecimals,
-  returnEthBalance,
-  getPricesFromContract
+  returnEthBalance
 }
