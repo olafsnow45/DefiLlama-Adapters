@@ -5,8 +5,8 @@ const utils = require('./helper/utils');
 *
 *****************/
 async function fetch() {
-  let staked = await utils.fetchURL('https://api.bt.finance/api/stats')
-  return staked.data.data.totalLockedValue;
+  var totalTvl = await utils.fetchURL('http://wanstakeinsight.com/wanswap_api/get_tvl')
+  return totalTvl.data.result;
 }
 
 module.exports = {
