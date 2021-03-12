@@ -4,9 +4,11 @@ const utils = require('./helper/utils');
 * ==> Correct adapter needs to be created.
 *
 *****************/
+
 async function fetch() {
-  let staked = await utils.fetchURL('https://api.bt.finance/api/stats')
-  return staked.data.data.totalLockedValue;
+  let response = await utils.fetchURL('https://api.goosedefi.com/getTVL')
+  return parseFloat(response.data);
+
 }
 
 module.exports = {
