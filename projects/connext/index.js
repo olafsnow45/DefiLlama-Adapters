@@ -3,7 +3,7 @@
 ==================================================*/
 
   const sdk = require('@defillama/sdk');
-  const abi = require('./abi.json');
+  const abi = require('./abi');
 
 /*==================================================
   Settings

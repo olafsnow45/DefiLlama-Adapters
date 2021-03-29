@@ -2,7 +2,7 @@
   Modules
   ==================================================*/
 
-  const abi = require('./abi.json');
+  const abi = require('./abi');
   const sdk = require('@defillama/sdk');
   const axios = require('axios');
   const _ = require('underscore');

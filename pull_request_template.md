@@ -13,7 +13,7 @@
 ##### Contact Email:
 
 
-##### Current TVL:
+##### Expected TVL:
 
 
 ##### Chain:
@@ -32,6 +32,3 @@
 
 
 ##### Category (Yield/Dexes/Lending/Minting):
-
-
-##### [Optional] ETH addresss (to receive a LlamaPunk):
