@@ -5,8 +5,8 @@ const utils = require('./helper/utils');
 *
 *****************/
 async function fetch() {
-  let tvl = await utils.fetchURL('https://api.yearn.tools/tvl')
-  return tvl.data.TvlUSD;
+  var staked = await utils.fetchURL('https://api-homora.alphafinance.io/pools')
+  return staked.data.tvlUSD;
 }
 
 module.exports = {
