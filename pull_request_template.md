@@ -1,10 +1,7 @@
-#### Why are you creating this pull request?
-
-
 ##### Twitter Link:
 
 
-##### List of audit if any:
+##### List of audit links if any:
 
 
 ##### Website Link:
@@ -13,7 +10,7 @@
 ##### Contact Email:
 
 
-##### Expected TVL:
+##### Current TVL:
 
 
 ##### Chain:
@@ -32,3 +29,6 @@
 
 
 ##### Category (Yield/Dexes/Lending/Minting):
+
+
+##### [Optional] ETH addresss (to receive a LlamaPunk):
