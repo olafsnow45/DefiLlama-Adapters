@@ -7,9 +7,7 @@
   const _ = require('underscore');
   const abi = require('./abi');
   const utils = require('../helper/utils')
-  const Web3 = require('web3');
-  const env = require('dotenv').config()
-  const web3 = new Web3(new Web3.providers.HttpProvider(`https://mainnet.infura.io/v3/${env.parsed.INFURA_KEY}`));
+  const web3 = require('../config/web3.js');
 
 /*==================================================
   Main
@@ -26,18 +24,20 @@
     const tokenWalletCalls = [];
     const reserves = new Set();
     pairs.forEach(pair=>{
-      const pairReserves = new Set(pair.reserves_src?.concat(pair.reserves_dest))
-      pairReserves.forEach(reserveAddress=>{
-        reserves.add(reserveAddress)
-        tokenWalletCalls.push({
-          target: reserveAddress,
-          params: [pair.address]
+      if(pair.reserves_src){
+        const pairReserves = new Set(pair.reserves_src.concat(pair.reserves_dest))
+        pairReserves.forEach(reserveAddress=>{
+          reserves.add(reserveAddress)
+          tokenWalletCalls.push({
+            target: reserveAddress,
+            params: [pair.address]
+          })
+          balanceOfCalls.push({
+            target: pair.address,
+            params: [reserveAddress]
+          })
         })
-        balanceOfCalls.push({
-          target: pair.address,
-          params: [reserveAddress]
-        })
-      })
+      }
     })
     const tokenWallets = (await sdk.api.abi.multiCall({
       block,
