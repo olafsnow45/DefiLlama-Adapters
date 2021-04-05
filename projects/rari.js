@@ -1,7 +1,7 @@
-const fetch = require("node-fetch");
+const fetchUrl = require("node-fetch");
 
 async function fetch() {
-  const { tvl } = fetch("https://app.rari.capital/api/stats").then((res) =>
+  const { tvl } = await fetchUrl("https://app.rari.capital/api/stats").then((res) =>
     res.json()
   );
 
