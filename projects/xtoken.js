@@ -1,7 +1,13 @@
+const env = require("dotenv").config();
 const retry = require("async-retry");
 const axios = require("axios");
 const utils = require("./helper/utils");
-const web3 = require('./config/web3.js');
+const Web3 = require("web3");
+const web3 = new Web3(
+  new Web3.providers.HttpProvider(
+    `https://mainnet.infura.io/v3/${env.parsed.INFURA_KEY}`
+  )
+);
 const BigNumber = require("bignumber.js");
 const {
   kncAddr,

@@ -1,25 +1,19 @@
+/*==================================================
+  Modules
+==================================================*/
+
   const sdk = require('@defillama/sdk');
   const BigNumber = require('bignumber.js');
   const _ = require('underscore');
   const abi = require('./abi');
   const utils = require('../helper/utils')
-  const web3 = require('../config/web3.js');
-  const { request, gql } = require("graphql-request");
+  const Web3 = require('web3');
+  const env = require('dotenv').config()
+  const web3 = new Web3(new Web3.providers.HttpProvider(`https://mainnet.infura.io/v3/${env.parsed.INFURA_KEY}`));
 
-
-  const usdtAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7'
-  const graphUrl = 'https://api.thegraph.com/subgraphs/name/dynamic-amm/dynamic-amm'
-const graphQuery = gql`
-query get_tvl($block: Int) {
-  dmmFactory(
-    id: "0x833e4083b7ae46cea85695c4f7ed25cdad8886de",
-    block: { number: $block }
-  ) {
-    totalVolumeUSD
-    totalLiquidityUSD
-  }
-}
-`;
+/*==================================================
+  Main
+==================================================*/
 
   async function tvl (timestamp, block) {
     const balances = {};
@@ -99,17 +93,6 @@ query get_tvl($block: Int) {
         balances[asset] = balance.toFixed();
       }
     });
-    const {dmmFactory} = await request(
-      graphUrl,
-      graphQuery,
-      {
-        block,
-      }
-    );
-    if(dmmFactory !== null){ // Has been created
-      const dmmTvlInUsdt = (Number(dmmFactory.totalLiquidityUSD)* 1e6).toFixed(0)
-      sdk.util.sumSingleBalance(balances, usdtAddress, dmmTvlInUsdt)
-    }
 
     return balances;
   }
@@ -119,7 +102,9 @@ query get_tvl($block: Int) {
 ==================================================*/
 
   module.exports = {
-    ethereum: tvl,
+    name: 'Kyber',
+    token: 'KNC',
+    category: 'DEXes',
     start: 1546515458,  // Jan-03-2019 11:37:38 AM +UTC
     tvl,
   };
