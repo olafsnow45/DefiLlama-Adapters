@@ -5,8 +5,8 @@ const utils = require('./helper/utils');
 *
 *****************/
 async function fetch() {
-  let tvl = await utils.fetchURL('https://yearn.science/v1/tvl/latest')
-  return tvl.data.tvl;
+  let staked = await utils.fetchURL('https://api.allinx.io/api/stats')
+  return staked.data.data.totalLockedValue;
 }
 
 module.exports = {
