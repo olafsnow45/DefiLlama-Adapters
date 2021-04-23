@@ -5,8 +5,8 @@ const utils = require('./helper/utils');
 *
 *****************/
 async function fetch() {
-  var staked = await utils.fetchURL('https://api.bt.finance/api/stats')
-  return staked.data.totalLockedValue;
+  var totalTvl = await utils.fetchURL('https://rpc.zookeeper.finance/api/v1/tvl');
+  return totalTvl.data;
 }
 
 module.exports = {

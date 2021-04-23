@@ -5,8 +5,8 @@ const utils = require('./helper/utils');
 *
 *****************/
 async function fetch() {
-  var staked = await utils.fetchURL('https://api.bt.finance/api/stats')
-  return staked.data.totalLockedValue;
+  var staked = await utils.fetchURL('https://api-homora.alphafinance.io/pools')
+  return staked.data.tvlUSD;
 }
 
 module.exports = {
