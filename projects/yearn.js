@@ -5,8 +5,8 @@ const utils = require('./helper/utils');
 *
 *****************/
 async function fetch() {
-  let staked = await utils.fetchURL('https://api.bzx.network/v1/vault-balance-usd')
-  return staked.data.data.all;
+  let tvl = await utils.fetchURL('https://yearn.science/v1/tvl/latest')
+  return tvl.data.tvl;
 }
 
 module.exports = {

@@ -1,11 +1,9 @@
 const axios = require('axios')
-const { toUSDTBalances } = require('../helper/balances')
+const BigNumber = require('bignumber.js')
+
+const usdtAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7'
 
 async function tvl(timestamp) {
-    if(Math.abs(timestamp-Date.now()/1000)<3600){
-        const tvl = await axios.get('https://yearn.science/v1/tvl/latest')
-        return toUSDTBalances(tvl.data.tvl)
-    }
     const historicalTvls = Object.entries((await axios.get('https://yearn.science/v1/tvl')).data)
         .map(([date, tvl]) => [Date.parse(date)/1000, tvl]).sort(([date1], [date2]) => date1 - date2);
     let high = historicalTvls.length;
@@ -19,7 +17,9 @@ async function tvl(timestamp) {
             high = mid;
         }
     }
-    return toUSDTBalances(historicalTvls[low][1])
+    return {
+        [usdtAddress]: BigNumber(historicalTvls[low][1]).times(1e6).toFixed(0)
+    }
 }
 
 

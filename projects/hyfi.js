@@ -5,8 +5,8 @@ const utils = require('./helper/utils');
 *
 *****************/
 async function fetch() {
-  let staked = await utils.fetchURL('https://api.bzx.network/v1/vault-balance-usd')
-  return staked.data.data.all;
+  var response = await utils.fetchURL('https://api.hyfi.pro/stat')
+  return response.data.vault_tvl;
 }
 
 module.exports = {

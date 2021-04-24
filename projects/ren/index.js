@@ -1,8 +1,6 @@
 const { request, gql } = require("graphql-request");
 const sdk = require('@defillama/sdk');
-const BigNumber = require("bignumber.js");
-const { toUSDT } = require('../helper/balances');
-
+const BigNumber = require("bignumber.js")
 
 const graphUrl = 'https://api.thegraph.com/subgraphs/name/renproject/renvm'
 const graphQuery = gql`
@@ -58,7 +56,7 @@ async function tvl(timestamp, block) {
     const usdAmount = supply.div(BigNumber(10).pow(dec)).times(asset.priceInUsd).toNumber()
     return acc + usdAmount;
   }, 0)
-  balances[usdtAddress]= toUSDT(assetsUsdTvl)
+  balances[usdtAddress]= (assetsUsdTvl * 1e6).toFixed(0)
 
   return balances
 }
