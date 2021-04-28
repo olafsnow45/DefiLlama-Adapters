@@ -1,9 +1,11 @@
+var Web3 = require('web3');
 const utils = require('./helper/utils');
 const BigNumber = require("bignumber.js");
 const { returnDecimals, getTokenPricesFromString } = require("./helper/utils");
 const pieABI = require("./config/piedao/abi/IPie.json");
 const erc20ABI = require("./config/piedao/abi/ERC20.json");
-const web3 = require('./config/web3.js');
+const env = require('dotenv').config()
+const web3 = new Web3(new Web3.providers.HttpProvider(`https://mainnet.infura.io/v3/${env.parsed.INFURA_KEY}`));
 
 let pies = [
     // DEFI+S
