@@ -1,9 +1,11 @@
+const env = require('dotenv').config();
+const Web3 = require('web3');
 const BigNumber = require('bignumber.js');
-const web3 = require('./config/web3.js');
+const infuraURL = `https://mainnet.infura.io/v3/${env.parsed.INFURA_KEY}`;
+const web3 = new Web3(new Web3.providers.HttpProvider(infuraURL));
 const defisaverABIs = require('./config/defisaver/abis');
 const utils = require('./helper/utils');
 const Multicall = require('@makerdao/multicall');
-const env = require("dotenv").config();
 
 // Configs
 const coins = {
@@ -146,16 +148,9 @@ const keys = [
   }
 ];
 
-let web3RpcUrl;
-if(process.env && process.env.ALCHEMY_API){
-    web3RpcUrl = `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API}`
-} else if(env && env.parsed && env.parsed.INFURA_KEY){
-    web3RpcUrl = `https://mainnet.infura.io/v3/${env.parsed.INFURA_KEY}`
-}
-
 // Utils
 const aggregate = (calls) => Multicall.aggregate(
-  calls, { multicallAddress: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441', rpcUrl: web3RpcUrl, }
+  calls, { multicallAddress: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441', rpcUrl: infuraURL, }
 );
 
 const bytesToString = (hex) => Buffer.from(hex.replace(/^0x/, ''), 'hex')
@@ -182,13 +177,10 @@ const initContracts = (web3) => {
   const {
     AaveSubscriptions, AaveLoanInfo, CompoundSubscriptions,
     CompoundLoanInfo, McdSubscriptions, MCDSaverProxy,
-    AaveSubscriptionsV2, AaveLoanInfoV2,
   } = defisaverABIs;
 
   const aaveSubs = getContract(AaveSubscriptions);
   const aaveLoans = getContract(AaveLoanInfo);
-  const aaveV2Subs = getContract(AaveSubscriptionsV2);
-  const aaveV2Loans = getContract(AaveLoanInfoV2);
   const compoundSubs = getContract(CompoundSubscriptions);
   const compoundLoans = getContract(CompoundLoanInfo);
   const mcdSubs = getContract(McdSubscriptions);
@@ -196,8 +188,6 @@ const initContracts = (web3) => {
   return {
     aaveSubscriptions: new web3.eth.Contract(aaveSubs.abi, aaveSubs.address),
     aaveLoanInfo: new web3.eth.Contract(aaveLoans.abi, aaveLoans.address),
-    aaveV2Subscriptions: new web3.eth.Contract(aaveV2Subs.abi, aaveV2Subs.address),
-    aaveV2LoanInfo: new web3.eth.Contract(aaveV2Loans.abi, aaveV2Loans.address),
     compoundSubscriptions: new web3.eth.Contract(compoundSubs.abi, compoundSubs.address),
     compoundLoanInfo: new web3.eth.Contract(compoundLoans.abi, compoundLoans.address),
     mcdSubscriptions: new web3.eth.Contract(mcdSubs.abi, mcdSubs.address),
@@ -284,38 +274,6 @@ const getAaveData = async (contracts, prices) => {
   return Math.floor(activeSubs.reduce((sum, sub) => sum + parseFloat(sub.sumCollUsd), 0));
 };
 
-const getAaveV2Data = async (contracts, prices) => {
-  const defaultMarket = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5'
-  let aaveSubs = await contracts.aaveV2Subscriptions.methods.getSubscribers().call();
-  let subData = await contracts.aaveV2LoanInfo.methods.getLoanDataArr(defaultMarket, aaveSubs.map(s => s.user)).call();
-  const activeSubs = subData.map((sub) => {
-    let sumBorrowUsd = 0;
-    let sumCollUsd = 0;
-
-    sub.borrowStableAmounts.forEach((amount, i) => {
-      if (sub.borrowAddr[i] === '0x0000000000000000000000000000000000000000') return;
-      const borrowUsd = assetAmountInEth(amount) * prices.ethereum.usd;
-      sumBorrowUsd += borrowUsd;
-    });
-
-    sub.borrowVariableAmounts.forEach((amount, i) => {
-      if (sub.borrowAddr[i] === '0x0000000000000000000000000000000000000000') return;
-      const borrowUsd = assetAmountInEth(amount) * prices.ethereum.usd;
-      sumBorrowUsd += borrowUsd;
-    });
-
-    sub.collAmounts.forEach((amount, i) => {
-      if (sub.collAddr[i] === '0x0000000000000000000000000000000000000000') return;
-      const collUsd = assetAmountInEth(amount) * prices.ethereum.usd;
-      sumCollUsd += collUsd;
-    });
-
-    return { sumBorrowUsd, sumCollUsd };
-  }).filter(({ sumBorrowUsd }) => sumBorrowUsd);
-
-  return Math.floor(activeSubs.reduce((sum, sub) => sum + parseFloat(sub.sumCollUsd), 0));
-};
-
 async function fetch() {
   const prices = (await utils.getPrices(keys)).data;
   const contracts = initContracts(web3);
@@ -323,9 +281,8 @@ async function fetch() {
   const makerColl = await getMakerData(contracts, prices);
   const compoundColl = await getCompoundData(contracts, prices);
   const aaveColl = await getAaveData(contracts, prices);
-  const aaveV2Coll = await getAaveV2Data(contracts, prices);
 
-  return makerColl + compoundColl + aaveColl + aaveV2Coll;
+  return makerColl + compoundColl + aaveColl;
 }
 
 module.exports = {
