@@ -1,19 +1,25 @@
-/*==================================================
-  Modules
-==================================================*/
-
   const sdk = require('@defillama/sdk');
   const BigNumber = require('bignumber.js');
   const _ = require('underscore');
   const abi = require('./abi');
   const utils = require('../helper/utils')
-  const Web3 = require('web3');
-  const env = require('dotenv').config()
-  const web3 = new Web3(new Web3.providers.HttpProvider(`https://mainnet.infura.io/v3/${env.parsed.INFURA_KEY}`));
+  const web3 = require('../config/web3.js');
+  const { request, gql } = require("graphql-request");
 
-/*==================================================
-  Main
-==================================================*/
+
+  const usdtAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7'
+  const graphUrl = 'https://api.thegraph.com/subgraphs/name/dynamic-amm/dynamic-amm'
+const graphQuery = gql`
+query get_tvl($block: Int) {
+  dmmFactory(
+    id: "0x833e4083b7ae46cea85695c4f7ed25cdad8886de",
+    block: { number: $block }
+  ) {
+    totalVolumeUSD
+    totalLiquidityUSD
+  }
+}
+`;
 
   async function tvl (timestamp, block) {
     const balances = {};
@@ -26,18 +32,20 @@
     const tokenWalletCalls = [];
     const reserves = new Set();
     pairs.forEach(pair=>{
-      const pairReserves = new Set(pair.reserves_src?.concat(pair.reserves_dest))
-      pairReserves.forEach(reserveAddress=>{
-        reserves.add(reserveAddress)
-        tokenWalletCalls.push({
-          target: reserveAddress,
-          params: [pair.address]
+      if(pair.reserves_src){
+        const pairReserves = new Set(pair.reserves_src.concat(pair.reserves_dest))
+        pairReserves.forEach(reserveAddress=>{
+          reserves.add(reserveAddress)
+          tokenWalletCalls.push({
+            target: reserveAddress,
+            params: [pair.address]
+          })
+          balanceOfCalls.push({
+            target: pair.address,
+            params: [reserveAddress]
+          })
         })
-        balanceOfCalls.push({
-          target: pair.address,
-          params: [reserveAddress]
-        })
-      })
+      }
     })
     const tokenWallets = (await sdk.api.abi.multiCall({
       block,
@@ -91,6 +99,17 @@
         balances[asset] = balance.toFixed();
       }
     });
+    const {dmmFactory} = await request(
+      graphUrl,
+      graphQuery,
+      {
+        block,
+      }
+    );
+    if(dmmFactory !== null){ // Has been created
+      const dmmTvlInUsdt = (Number(dmmFactory.totalLiquidityUSD)* 1e6).toFixed(0)
+      sdk.util.sumSingleBalance(balances, usdtAddress, dmmTvlInUsdt)
+    }
 
     return balances;
   }
@@ -100,9 +119,7 @@
 ==================================================*/
 
   module.exports = {
-    name: 'Kyber',
-    token: 'KNC',
-    category: 'DEXes',
+    ethereum: tvl,
     start: 1546515458,  // Jan-03-2019 11:37:38 AM +UTC
     tvl,
   };
