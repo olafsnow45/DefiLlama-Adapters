@@ -1,13 +1,23 @@
+/*==================================================
+  Modules
+  ==================================================*/
+
 const sdk = require('@defillama/sdk');
 const _ = require('underscore');
 const BigNumber = require('bignumber.js');
 
 const abi = require('./abi');
 
+/*==================================================
+  TVL
+  ==================================================*/
+
 const gusd = '0x056Fd409E1d7A124BD7017459dFEa2F387b6d5Cd'
 
 async function tvl(timestamp, block) {
-  let balances = {};
+  let balances = {
+    '0x0000000000000000000000000000000000000000': '0', // ETH
+  };
 
   let poolLogs = await sdk.api.util.getLogs({
     target: '0x0Ba2e75FE1368d8d517BE1Db5C39ca50a1429441',
@@ -48,22 +58,18 @@ async function tvl(timestamp, block) {
     })
   });
 
-  const [{output: poolBalances}, {output: tokensUnderlyings}, {output: pricesPerFullShare}, {output: tokens}, {output:v2PricePerShare}] = await Promise.all([
+  const [{output: poolBalances}, {output: tokensUnderlyings}, {output: pricesPerFullShare}, {output: tokens}] = await Promise.all([
     sdk.api.abi.multiCall({ block, calls: poolCalls, abi: 'erc20:balanceOf' }),
     sdk.api.abi.multiCall({ block, calls: poolCalls.map(c => ({target: c.target})), abi: abi.underlying }),
     sdk.api.abi.multiCall({ block, calls: poolCalls.map(c => ({target: c.target})), abi: abi.getPricePerFullShare }),
-    sdk.api.abi.multiCall({ block, calls: poolCalls.map(c => ({target: c.target})), abi: abi.token }),
-    sdk.api.abi.multiCall({ block, calls: poolCalls.map(c => ({target: c.target})), abi: abi.pricePerShare }),
+    sdk.api.abi.multiCall({ block, calls: poolCalls.map(c => ({target: c.target})), abi: abi.token })
   ]);
 
   for (let i = 0; i < poolBalances.length; i++) {
     const balanceOf = poolBalances[i];
     const tokenAddress = balanceOf.input.target;
     let underlying = _.find(tokensUnderlyings, t => t.input.target === tokenAddress);
-    let pricePerFullShare = pricesPerFullShare[i];
-    if(v2PricePerShare[i].success){
-      pricePerFullShare = v2PricePerShare[i];
-    }
+    const pricePerFullShare = pricesPerFullShare[i];
     if(pricePerFullShare.success){
       underlying = tokens[i];
       if(underlying.output.toLowerCase() === '0xd2967f45c4f384deea880f807be904762a3dea07'){
@@ -92,7 +98,14 @@ async function tvl(timestamp, block) {
   return balances;
 }
 
+/*==================================================
+  Exports
+  ==================================================*/
+
 module.exports = {
+  name: 'PowerIndex',
+  token: null,
+  category: 'dexes',
   start : 1606768668, // 11/30/2021 @ 08:37am (UTC)
   tvl
 }

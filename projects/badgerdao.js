@@ -6,9 +6,8 @@ const utils = require('./helper/utils');
 *****************/
 
 async function fetch() {
-  let eth = await utils.fetchURL('https://api.badger.finance/v2/value?chain=eth')
-  let bsc = await utils.fetchURL('https://api.badger.finance/v2/value?chain=bsc')
-  return eth.data.totalValue + bsc.data.totalValue;
+  let response = await utils.fetchURL('https://api.sett.vision/protocol/value')
+  return response.data.totalValue;
 }
 
 module.exports = {
