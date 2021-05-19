@@ -12,6 +12,12 @@ function findClosestToDate(values, date) {
             min = val
         }
     }
+    if(Math.abs(new Date(min.time).getTime()-date) > 24*3600*1000){
+        return {
+            totalDeposits: 0,
+            totalBorrows: 0
+        }
+    }
     return min
 }
 
