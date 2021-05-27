@@ -1,4 +1,4 @@
-const retry = require('./helper/retry')
+const retry = require('async-retry')
 const axios = require("axios");
 const { GraphQLClient, gql } = require('graphql-request')
 const utils = require('./helper/utils');
