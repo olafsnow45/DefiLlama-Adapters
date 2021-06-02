@@ -1,16 +1,12 @@
+const { request, gql } = require("graphql-request");
 const sdk = require('@defillama/sdk');
 const { toUSDTBalances } = require('../helper/balances');
-const { GraphQLClient, gql } = require('graphql-request');
 
-const endpoints = {
-  bsc: 'https://api.thegraph.com/subgraphs/name/mochiswapdev/mochiswap3',
-  harmony: 'https://api.mochiswap.io/subgraphs/name/mochiswap/mochiswap1',
-}
-
+const graphUrl = 'https://api.thegraph.com/subgraphs/name/mochiswapdev/mochiswap3'
 const graphQuery = gql`
 query get_tvl($block: Int) {
-  uniswapFactories(
-    first: 1,
+  uniswapFactory(
+    id: "0xCBac17919f7aad11E623Af4FeA98B10B84802eAc",
     block: { number: $block }
   ) {
     totalLiquidityUSD
@@ -18,27 +14,26 @@ query get_tvl($block: Int) {
 }
 `;
 
-async function getChainTvl(chain, block) {
-  const graphQLClient = new GraphQLClient(endpoints[chain]);
-  const results = await graphQLClient.request(query, { block });
+async function tvl(timestamp) {
+  const {block} = await sdk.api.util.lookupBlock(timestamp,{
+    chain: 'bsc'
+  })
+  const response = await request(
+    graphUrl,
+    graphQuery,
+    {
+      block,
+    }
+  );
 
-  return toUSDTBalances(results.uniswapFactory[0].totalLiquidityUSD);
-}
+  const usdTvl = Number(response.uniswapFactory.totalLiquidityUSD)
 
-async function bsc(timestamp, block, chainBlocks) {
-  return getChainTvl('bsc', chainBlocks['bsc']);
-}
-
-async function harmony(timestamp, block, chainBlocks) {
-  return getChainTvl('harmony', chainBlocks['harmony']);
+  return toUSDTBalances(usdTvl)
 }
 
 module.exports = {
-  bsc: {
-    tvl: bsc
+  bsc:{
+    tvl,
   },
-  harmony: {
-    tvl: harmony
-  },
-  tvl: sdk.util.sumChainTvls([harmony, bsc])
+  tvl
 }
