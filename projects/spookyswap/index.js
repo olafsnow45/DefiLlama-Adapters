@@ -1,12 +1,30 @@
-const {calculateUniTvl} = require('../helper/calculateUniTvl.js')
-const {transformFantomAddress} = require('../helper/portedTokens.js')
+const { request, gql } = require("graphql-request");
+const { toUSDTBalances } = require('../helper/balances');
 
-const factory = '0x152eE697f2E276fA89E96742e9bB9aB1F2E61bE3'
-async function tvl(_timestamp, _ethBlock, chainBlocks){
-  const transform = await transformFantomAddress();
+const graphUrl = 'https://api.thegraph.com/subgraphs/name/eerieeight/spookyswap'
+const graphQuery = gql`
+query get_tvl($block: Int) {
+  uniswapFactory(
+    id: "0x152eE697f2E276fA89E96742e9bB9aB1F2E61bE3",
+    block: { number: $block }
+  ) {
+    totalVolumeUSD
+    totalLiquidityUSD
+  }
+}
+`;
 
-  const balances = await calculateUniTvl(transform, chainBlocks['fantom'], 'fantom', factory, 3795376, true);
-  return balances
+async function tvl(timestamp, block, chainBlocks) {
+  const {uniswapFactory} = await request(
+    graphUrl,
+    graphQuery,
+    {
+      block:chainBlocks['fantom'],
+    }
+  );
+  const usdTvl = Number(uniswapFactory.totalLiquidityUSD)
+
+  return toUSDTBalances(usdTvl)
 }
 
 module.exports = {
