@@ -16,13 +16,8 @@ async function fantom() {
   return tvl.data.data.tvl
 }
 
-async function xdai() {
-  const tvl = await utils.fetchURL('https://api.curve.fi/api/getTVLxDai')
-  return tvl.data.data.tvl
-}
-
 async function fetch() {
-  return (await eth())+(await polygon()) + (await fantom())+ (await xdai())
+  return (await eth())+(await polygon()) + (await fantom())
 }
 
 module.exports = {
@@ -34,9 +29,6 @@ module.exports = {
   },
   polygon:{
     fetch:polygon
-  },
-  xdai:{
-    fetch: xdai
   },
   fetch
 }
