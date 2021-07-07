@@ -99,9 +99,9 @@ async function tvl(timestamp, block) {
 }
 
 module.exports = {
-  methodology: `Counts all the tokens being used as collateral of CDPs and the DAI locked in the DSR (Dai Savings Rate) contract.
-  
-  On the technical level, we get all the collateral tokens by fetching events, get the amounts locked by calling balanceOf() directly, unwrap any uniswap LP tokens and then get the price of each token from coingecko`,
+  name: 'Maker',
+  token: 'MKR',
+  category: 'lending',
   start: 1513566671, // 12/18/2017 @ 12:00am (UTC)
   tvl,
 };

@@ -1,6 +1,7 @@
 const sdk = require('@defillama/sdk');
 const BigNumber = require('bignumber.js').default;
 const abi = require('./config/wepiggy/abi.json');
+const utils = require('./helper/utils');
 
 const contracts = {
   ethereum: {
@@ -13,10 +14,6 @@ const contracts = {
   },
   bsc: {
     comptroller: '0x8c925623708A94c7DE98a8e83e8200259fF716E0',
-    oracle: '0x4C78015679FabE22F6e02Ce8102AFbF7d93794eA',
-  },
-  polygon: {
-    comptroller: '0xFfceAcfD39117030314A07b2C86dA36E51787948',
     oracle: '0x4C78015679FabE22F6e02Ce8102AFbF7d93794eA',
   },
 };
@@ -44,9 +41,6 @@ async function getUnderlyingDecimals(block, chain, token) {
   }
   if (token.toLowerCase() === '0x33A32f0ad4AA704e28C93eD8Ffa61d50d51622a7'.toLowerCase()) {
     return 18; //BNB
-  }
-  if (token.toLowerCase() === '0xC1B02E52e9512519EDF99671931772E452fb4399'.toLowerCase()) {
-    return 18; //MATIC
   }
   const { output: underlying } = await sdk.api.abi.call({
     target: token,
@@ -110,11 +104,7 @@ function fetchChain(chain) {
 }
 
 async function fetch() {
-  let tvl =
-    (await fetchChain('ethereum')()) +
-    (await fetchChain('okexchain')()) +
-    (await fetchChain('bsc')()) +
-    (await fetchChain('polygon')());
+  let tvl = (await fetchChain('ethereum')()) + (await fetchChain('okexchain')()) + (await fetchChain('bsc')());
   return tvl;
 }
 
@@ -127,9 +117,6 @@ module.exports = {
   },
   bsc: {
     fetch: fetchChain('bsc'),
-  },
-  polygon: {
-    fetch: fetchChain('polygon'),
   },
   fetch,
 };
