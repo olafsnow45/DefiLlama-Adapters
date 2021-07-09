@@ -12,24 +12,27 @@ query get_tvl($block: Int) {
         totalLiquidityETH
         totalLiquidityUSD
   },
-  tokens(where: { id: "0xde3a24028580884448a5397872046a019649b084" }) {
+  tokens(where: { symbol: "USDT" }, first:1) {
     derivedETH
   }
 }
 `;
 
-async function tvl(timestamp, ethBlock, chainBlocks) {
+async function tvl(timestamp) {
+  const {block} = await sdk.api.util.lookupBlock(timestamp,{
+    chain: 'avax'
+  })
   const response = await request(
     graphUrl,
     graphQuery,
     {
-      block:chainBlocks.avax,
+      block,
     }
   );
 
-  return {
-    'avalanche-2': Number(response.pangolinFactory.totalLiquidityETH)
-  }
+  const usdTvl = Number(response.pangolinFactory.totalLiquidityETH) / Number(response.tokens[0].derivedETH)
+
+  return toUSDTBalances(usdTvl)
 }
 
 module.exports = {
