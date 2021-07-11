@@ -1,4 +1,4 @@
-const sdk = require("@defillama/sdk");
+sdk = require("@defillama/sdk");
 const erc20 = require("../helper/abis/erc20.json");
 const abi = require("./abi.json");
 

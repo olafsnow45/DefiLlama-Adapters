@@ -1,22 +1,17 @@
 const retry = require('./helper/retry')
 const { GraphQLClient, gql } = require('graphql-request')
-const { toUSDTBalances } = require('./helper/balances');
 
-async function tvl(_timestamp, _ethBlock, chainBlocks) {
+async function fetch() {
   var totalValue = 0;
 
   var graphQLClient = new GraphQLClient('https://api.thegraph.com/subgraphs/name/waka-finance/waka-graph')
   var reserveQuery = gql`
-  query get_tvl($block: Int) {
-    pairs (
-      block: { number: $block }
-    ) {
+  {
+    pairs {
       reserveUSD
     }
   }`;
-  var reserveResult = await retry(async bail => await graphQLClient.request(reserveQuery, {
-    block: chainBlocks.fantom
-  }))
+  var reserveResult = await retry(async bail => await graphQLClient.request(reserveQuery))
   var reserves = reserveResult.pairs;
 
   for (var i = 0; i < reserves.length; i ++) {
@@ -24,12 +19,12 @@ async function tvl(_timestamp, _ethBlock, chainBlocks) {
     totalValue += reserveUSD;
   }
   
-  return toUSDTBalances(totalValue);
+  return totalValue;
 }
 
 module.exports = {
   fantom:{
-    tvl,
+    fetch,
   },
-  tvl
+  fetch
 }
