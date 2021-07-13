@@ -18,25 +18,9 @@ query GET_POOLS($block: Int) {
 }
 `;
 
-async function getChainBalances(allPrizePools, chain, block){
-  const balances = {};
-  const lockedTokens = await sdk.api.abi.multiCall({
-    abi: abi['accountedBalance'],
-    calls: allPrizePools.map(pool => ({
-      target: pool.id
-    })),
-    block,
-    chain
-  })
-  lockedTokens.output.forEach(call => {
-    const underlyingToken = allPrizePools.find(pool => pool.id === call.input.target).underlyingCollateralToken;
-    const underlyingTokenBalance = call.output
-    sdk.util.sumSingleBalance(balances, underlyingToken, underlyingTokenBalance)
-  })
-  return balances
-}
+async function tvl(timestamp, block) {
+  let balances = {};
 
-async function eth(timestamp, block) {
   let allPrizePools = []
   for (const graphUrl of graphUrls) {
     const { prizePools } = await request(
@@ -46,28 +30,28 @@ async function eth(timestamp, block) {
         block,
       }
     );
-    allPrizePools = allPrizePools.concat(prizePools).concat([{
-      id: "0xc32a0f9dfe2d93e8a60ba0200e033a59aec91559",
-      underlyingCollateralToken: "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2"
-    }])
+    allPrizePools = allPrizePools.concat(prizePools)
   }
-  return getChainBalances(allPrizePools, 'ethereum', block)
-}
-
-async function polygon(timestamp, block, chainBlocks) {
-  return getChainBalances([{
-    id: "0x887E17D791Dcb44BfdDa3023D26F7a04Ca9C7EF4",
-    underlyingCollateralToken: "0xdac17f958d2ee523a2206206994597c13d831ec7"
-  }], 'polygon', chainBlocks.polygon)
+  const lockedTokens = await sdk.api.abi.multiCall({
+    abi: abi['accountedBalance'],
+    calls: allPrizePools.map(pool => ({
+      target: pool.id
+    })),
+    block
+  })
+  lockedTokens.output.forEach(call => {
+    const underlyingToken = allPrizePools.find(pool => pool.id === call.input.target).underlyingCollateralToken;
+    const underlyingTokenBalance = call.output
+    sdk.util.sumSingleBalance(balances, underlyingToken, underlyingTokenBalance)
+  })
+  return balances
 }
 
 
 module.exports = {
-  ethereum:{
-    tvl: eth
-  },
-  polygon:{
-    tvl:polygon
-  },
-  tvl: sdk.util.sumChainTvls([eth, polygon])
+  name: 'PoolTogether',
+  token: 'POOL',
+  category: 'staking',
+  start: 0, // WRONG!
+  tvl
 }

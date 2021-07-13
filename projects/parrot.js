@@ -1,4 +1,24 @@
-const {getTokenBalance} = require('./helper/solana')
+const axios = require('axios')
+
+"DGi3TxcKUq3E5t1mL33n9jRgdWWKngeRkP3fUppG4inn"
+
+async function getTokenBalance(token, account) {
+    const tokenBalance = await axios.post("https://api.mainnet-beta.solana.com", {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getTokenAccountsByOwner",
+        "params": [
+            account,
+            {
+                "mint": token
+            },
+            {
+                "encoding": "jsonParsed"
+            }
+        ]
+    })
+    return tokenBalance.data.result.value[0].account.data.parsed.info.tokenAmount.uiAmount
+}
 
 async function tvl() {
     const [usdcAmount, usdtAmount] = await Promise.all([

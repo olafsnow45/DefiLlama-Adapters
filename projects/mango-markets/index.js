@@ -1,6 +1,6 @@
 const axios = require('axios')
 
-const endpoint = 'https://mango-stats.herokuapp.com?mangoGroup=BTC_ETH_SOL_SRM_USDC'
+const endpoint = 'https://mango-stats.herokuapp.com?mangoGroup=BTC_ETH_USDT'
 
 // Very inefficient
 function findClosestToDate(values, date) {
@@ -24,9 +24,7 @@ function findClosestToDate(values, date) {
 const coingeckoIds = {
     'ETH': 'ethereum',
     'BTC': 'bitcoin',
-    'SOL': 'solana',
-    'SRM': 'serum',
-    'USDC': 'usd-coin'
+    'USDT': 'tether'
 }
 
 
@@ -41,11 +39,6 @@ async function tvl(timestamp) {
     })
     return balances
 }
-
-async function test() {
-    console.log(await tvl(Date.now()/1000));
-}
-// test();
 
 module.exports = {
     solana: {

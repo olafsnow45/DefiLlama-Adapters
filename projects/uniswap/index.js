@@ -27,7 +27,6 @@ async function tvl(timestamp, block) {
 }
 
 module.exports = {
-  methodology: `Counts the tokens locked on AMM pools, pulling the data from the 'ianlapham/uniswapv2' subgraph`,
   ethereum:{
     tvl,
   },
