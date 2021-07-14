@@ -100,17 +100,10 @@ async function transformOkexAddress() {
     // TODO
 }
 
-async function transformHecoAddress() {
-  return (addr) => {
-    return `heco:${addr}`;
-  };
-}
-
 module.exports = {
     transformFantomAddress,
     transformBscAddress,
     transformPolygonAddress,
     transformXdaiAddress,
-    transformAvaxAddress,
-    transformHecoAddress
+    transformAvaxAddress
 };
