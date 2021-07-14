@@ -54,7 +54,7 @@
       abi: 'erc20:balanceOf'
     });
 
-    sdk.util.sumMultiBalanceOf(balances, balanceOfResults, true);
+    sdk.util.sumMultiBalanceOf(balances, balanceOfResults);
 
     return balances;
   }

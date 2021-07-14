@@ -1,24 +1,34 @@
-const { getChainTvl } = require('../helper/getUniSubgraphTvl');
-const sdk = require('@defillama/sdk')
+const { request, gql } = require("graphql-request");
+const { toUSDTBalances } = require('../helper/balances');
 
-const graphUrls = {
-  ethereum: 'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-alt',
-  arbitrum: 'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-arbitrum-one',
-  optimism: 'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-optimism',
+const graphUrl = 'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-alt'
+const graphQuery = gql`
+query get_tvl($block: Int) {
+  factories(
+    block: { number: $block }
+  ) {
+    totalVolumeUSD
+    totalValueLockedUSD
+  }
 }
-const chainTvl = getChainTvl(graphUrls, "factories", "totalValueLockedUSD")
+`;
+
+async function tvl(timestamp, block) {
+  const {factories} = await request(
+    graphUrl,
+    graphQuery,
+    {
+      block,
+    }
+  );
+  const usdTvl = Number(factories[0].totalValueLockedUSD)
+
+  return toUSDTBalances(usdTvl)
+}
 
 module.exports = {
-  ethereum: {
-    tvl: chainTvl('ethereum'),
+  ethereum:{
+    tvl,
   },
-  optimism: {
-    tvl: chainTvl('optimism'),
-  },
-  /*
-  arbitrum: {
-    tvl: chainTvl('arbitrum'),
-  },
-  */
-  tvl: sdk.util.sumChainTvls(['ethereum', 'optimism'].map(chainTvl))
+  tvl
 }

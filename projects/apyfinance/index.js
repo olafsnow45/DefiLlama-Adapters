@@ -1,4 +1,4 @@
-const sdk = require("@defillama/sdk");
+sdk = require("@defillama/sdk");
 const erc20 = require("../helper/abis/erc20.json");
 const abi = require("./abi.json");
 
@@ -43,7 +43,7 @@ const ethTvl = async (timestamp, ethBlock, chainBlocks) => {
 };
 
 module.exports = {
-  ethereum: {
+  eth: {
     tvl: ethTvl,
   },
   tvl: sdk.util.sumChainTvls([ethTvl]),

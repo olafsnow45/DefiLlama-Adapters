@@ -16,10 +16,11 @@ const passedFile = path.resolve(process.cwd(), process.argv[2]);
 (async () => {
     const moduleToTest = require(passedFile);
     let usdTvl;
-    const { timestamp, ethereumBlock, chainBlocks } = await getCurrentBlocks();
     if (moduleToTest.fetch) {
-        usdTvl = await moduleToTest.fetch(timestamp);
+        usdTvl = await moduleToTest.fetch();
     } else if (moduleToTest.tvl) {
+        const { timestamp, ethereumBlock, chainBlocks } = await getCurrentBlocks();
+
         let tvl = await moduleToTest.tvl(timestamp, ethereumBlock, chainBlocks);
         if (typeof tvl !== "object") {
             throw new Error("TVL returned is not a balances object");
