@@ -61,14 +61,14 @@ async function eth(timestamp, block) {
     // eth
     balances[coinAddress] = (await sdk.api.eth.getBalance({
         target: ethPool,
-        block: ethBlock
+        ethBlock
     })).output
 
     // staking pool
     let tokenStaked = await sdk.api.erc20.balanceOf({
         owner: stakingPool,
         target: bfcAddr,
-        block: ethBlock
+        ethBlock
       });
       sdk.util.sumSingleBalance(balances, bfcAddr, tokenStaked.output);
 
@@ -78,7 +78,7 @@ async function eth(timestamp, block) {
         let tokenLocked = await sdk.api.erc20.balanceOf({
             owner: tokenPool.pool,
             target: tokenPool.token,
-            block: ethBlock
+            ethBlock
           });
           sdk.util.sumSingleBalance(balances, tokenPool.token, tokenLocked.output);
     }
@@ -95,7 +95,7 @@ async function bsc(timestamp, block, chainBlocks) {
     balances[getBSCAddress(wbnb)] = ((await sdk.api.eth.getBalance({
         target: bscPool,
         chain: 'bsc',
-        block: bscBlock
+        bscBlock
     })).output)
 
     // bsc tokens
@@ -105,10 +105,11 @@ async function bsc(timestamp, block, chainBlocks) {
             owner: tokenPool.pool,
             target: tokenPool.token,
             chain: 'bsc',
-            block: bscBlock
+            bscBlock
           });
           sdk.util.sumSingleBalance(balances, getBSCAddress(tokenPool.token), tokenLocked.output);
     }
+
 
     return balances
 }
