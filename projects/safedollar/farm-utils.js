@@ -1,6 +1,5 @@
 const sdk = require('@defillama/sdk');
 const BigNumber = require('bignumber.js');
-const farmBsc = require('./farms-bsc.json');
 const farmPolygon = require('./farms-polygon.json');
 
 const farmLPBalance = async (
@@ -44,7 +43,6 @@ const farmLPBalance = async (
 
   const token0Locked = (balances[2].output * balances[0].output) / lpTotalSuply;
   const token1Locked = (balances[2].output * balances[1].output) / lpTotalSuply;
-
   return [
     { token: `${chain}:${token0}`, locked: token0Locked },
     { token: `${chain}:${token1}`, locked: token1Locked },
@@ -65,45 +63,6 @@ const farmSingleTokenBalance = async (chain, block, masterChef, token) => {
   return [{ token: `${chain}:${token}`, locked: masterChefBalance }];
 };
 
-const bscFarmLocked = async (block) => {
-  const balances = {};
-  const tokens = farmBsc.tokens;
-
-  const allPools = farmBsc.farms
-    .map((t) => {
-      return t.pools.map((pool) => {
-        return Object.assign(pool, {
-          masterChef: t.masterChef,
-        });
-      });
-    })
-    .reduce((acc, current) => [...acc, ...current], []);
-
-  const promises = allPools.map((item) => {
-    return item.single
-      ? farmSingleTokenBalance('bsc', block, item.masterChef, item.lpToken)
-      : farmLPBalance(
-          'bsc',
-          block,
-          item.masterChef,
-          item.lpToken,
-          tokens[item.token0],
-          tokens[item.token1],
-        );
-  });
-
-  const data = await Promise.all(promises);
-
-  data.forEach((farm) => {
-    farm.forEach((item) => {
-      balances[item.token] = new BigNumber(balances[item.token] || 0)
-        .plus(item.locked || 0)
-        .toFixed(0);
-    });
-  });
-
-  return balances;
-};
 
 const polygonFarmLocked = async (block) => {
   const balances = {};
@@ -133,7 +92,6 @@ const polygonFarmLocked = async (block) => {
   });
 
   const data = await Promise.all(promises);
-
   data.forEach((farm) => {
     farm.forEach((item) => {
       balances[item.token] = new BigNumber(balances[item.token] || 0)
@@ -146,6 +104,5 @@ const polygonFarmLocked = async (block) => {
 };
 
 module.exports = {
-  bscFarmLocked,
   polygonFarmLocked,
 };
