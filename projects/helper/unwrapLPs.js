@@ -136,12 +136,16 @@ async function unwrapUniswapLPs(balances, lpPositions, block, chain='ethereum', 
         const token0 = (await tokens0).output.find(call=>call.input.target === lpToken).output
         const token1 = (await tokens1).output.find(call=>call.input.target === lpToken).output
         const supply = (await lpSupplies).output.find(call=>call.input.target === lpToken).output
-        const {_reserve0, _reserve1} = (await lpReserves).output.find(call=>call.input.target === lpToken).output
+        try {
+            const {_reserve0, _reserve1} = (await lpReserves).output.find(call=>call.input.target === lpToken).output
 
-        const token0Balance = BigNumber(lpPosition.balance).times(BigNumber(_reserve0)).div(BigNumber(supply))
-        sdk.util.sumSingleBalance(balances, await transformAddress(token0.toLowerCase()), token0Balance.toFixed(0))
-        const token1Balance = BigNumber(lpPosition.balance).times(BigNumber(_reserve1)).div(BigNumber(supply))
-        sdk.util.sumSingleBalance(balances, await transformAddress(token1.toLowerCase()), token1Balance.toFixed(0))
+            const token0Balance = BigNumber(lpPosition.balance).times(BigNumber(_reserve0)).div(BigNumber(supply))
+            sdk.util.sumSingleBalance(balances, await transformAddress(token0.toLowerCase()), token0Balance.toFixed(0))
+            const token1Balance = BigNumber(lpPosition.balance).times(BigNumber(_reserve1)).div(BigNumber(supply))
+            sdk.util.sumSingleBalance(balances, await transformAddress(token1.toLowerCase()), token1Balance.toFixed(0))
+        } catch(err) {
+            console.error(err);
+        }
       }))
 }
 
@@ -213,33 +217,10 @@ async function sumTokensAndLPs(balances, tokens, owners, block, chain = "ethereu
     await unwrapUniswapLPs(balances, lpBalances, block, chain, transformAddress)
 }
 
-/*
-tokensAndOwners [
-    [token, owner] - eg ["0xaaa", "0xbbb"]
-]
-*/
-async function sumTokens(balances, tokensAndOwners, block, chain = "ethereum", transformAddress=id=>id){
-    const balanceOfTokens = await sdk.api.abi.multiCall({
-        calls: tokensAndOwners.map(t=>({
-            target: t[0],
-            params: t[1]
-        })),
-        abi: 'erc20:balanceOf',
-        block,
-        chain
-    })
-    balanceOfTokens.output.forEach((result, idx)=>{
-        const token = result.input.target
-        const balance = result.output
-        sdk.util.sumSingleBalance(balances, transformAddress(token), balance);
-    })
-}
-
 module.exports = {
     unwrapCrv,
     unwrapUniswapLPs,
     addTokensAndLPs,
     sumTokensAndLPs,
-    addBalanceOfTokensAndLPs,
-    sumTokens
+    addBalanceOfTokensAndLPs
 }
