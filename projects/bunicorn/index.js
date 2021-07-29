@@ -5,7 +5,8 @@ const { request, gql } = require("graphql-request");
 
 const tokenSubgraphUrl = 'https://graph.bunicorn.exchange/subgraphs/name/bunicorndefi/buni-token';
 const stableSubgraphUrl = 'https://api.thegraph.com/subgraphs/name/bunicorndefi/buni-stablecoins';
-
+const BUNI_CONTRACT_ADDRESS = '0x0e7beec376099429b85639eb3abe7cf22694ed49';
+const MASTERCHET_CONTRACT_ADDRESS = '0xA12c974fE40ea825E66615bA0Dc4Fd19be4D7d24';
 
 const graphTotalTokenTVLQuery = gql`
 query GET_TOTAL_TOKEN_TVL($block: Int) {
@@ -26,6 +27,58 @@ query GET_TOTAL_STABLE_TVL($block: Int) {
   }
 }
 `;
+
+const graphBuniPriceQuery = gql`
+query GET_BUNI_PRICE($block: Int) {
+  tokenPrices(where: {id: "0x0e7beec376099429b85639eb3abe7cf22694ed49"}, block: { number: $block }) {
+    id
+    symbol
+    name
+    decimals
+    price
+  }
+}
+`;
+
+async function getBuniPrice(chainBlocks) {
+  const { tokenPrices } = await request(
+    tokenSubgraphUrl,
+    graphBuniPriceQuery,
+    {
+      block: chainBlocks.bsc
+    }
+  );
+  if (!tokenPrices || !tokenPrices[0]) {
+    throw new Error('Empty price');
+  }
+
+  return parseFloat(tokenPrices[0].price);
+}
+
+
+async function getTotalFarmTVL(timestamp, ethBlock, chainBlocks) {
+  try {
+    const block = chainBlocks.bsc
+    const result = await sdk.api.abi.multiCall({
+      calls: [
+        {
+          target: BUNI_CONTRACT_ADDRESS,
+          params: [MASTERCHET_CONTRACT_ADDRESS]
+        }
+      ],
+      block,
+      abi: abi.balanceOf,
+      chain: 'bsc'
+    })
+    const balance = result.output[0] && result.output[0].output;
+    const buniPrice = await getBuniPrice(chainBlocks);
+
+    return new BigNumber(balance).div(1e18).times(buniPrice);
+  } catch (e) {
+    throw new Error('getTotalFarmTVL has exception:' + e.message);
+  }
+}
+
 
 async function getTotalTokenTVL(timestamp, ethBlock, chainBlocks) {
   try {
@@ -72,6 +125,9 @@ module.exports = {
   bsc:{
     tvl: getTotalTVL
   },
-  tvl: sdk.util.sumChainTvls([getTotalTVL])
+  staking:{
+    tvl: getTotalFarmTVL,
+  },
+  tvl: sdk.util.sumChainTvls([getTotalTVL, getTotalFarmTVL])
 }
 
