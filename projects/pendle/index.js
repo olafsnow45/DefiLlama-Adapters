@@ -1,5 +1,5 @@
 const sdk = require('@defillama/sdk');
-const { sumTokensAndLPsSharedOwners } = require('../helper/unwrapLPs')
+const { sumTokensAndLPs } = require('../helper/unwrapLPs')
 
 const aUSDC = "0xbcca60bb61934080951369a648fb03df4f96263c"
 const cDAI = "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643"
@@ -9,10 +9,8 @@ const PENDLE = "0x808507121b80c02388fad14726482e061b8da827"
 const contracts = Object.keys({
     "0x33d3071cfa7404a406edB5826A11620282021745": "PendleAaveV2YieldTokenHolder",
     "0xb0aa68d8A0D56ae7276AB9E0E017965a67320c60": "PendleCompoundYieldTokenHolder",
-    "0x9e382E5f78B06631E4109b5d48151f2b3f326df0": "PendleAaveDec21Market",
-    "0x8315BcBC2c5C1Ef09B71731ab3827b0808A2D6bD": "PendleAaveDec22Market",
-    "0x944d1727d0b656f497e74044ff589871c330334f": "PendleCompoundDec21Market",
-    "0xB26C86330FC7F97533051F2F8cD0a90C2E82b5EE": "PendleCompoundDec22Market",
+    "0x8315BcBC2c5C1Ef09B71731ab3827b0808A2D6bD": "PendleAaveMarket",
+    "0xB26C86330FC7F97533051F2F8cD0a90C2E82b5EE": "PendleCompoundMarket",
     "0x2F16B22C839FA995375602562ba5dD15A22d349d": "PendleLpHolder_Compound",
     "0x76A16d9325E9519Ef1819A4e7d16B168956f325F": "PendleLpHolder_Aave",
 })
@@ -21,7 +19,7 @@ const SingleStaking = "0x07282F2CEEbD7a65451Fcd268b364300D9e6D7f5"
 // Treasury TVL consists of DAI balance + Sushi SLP balance
 async function tvl(timestamp, block) {
     const balances = {}
-    await sumTokensAndLPsSharedOwners(balances, [
+    await sumTokensAndLPs(balances, [
         [aUSDC, false],
         [cDAI, false],
         [USDC, false],
@@ -32,18 +30,18 @@ async function tvl(timestamp, block) {
 
 async function staking(timestamp, block) {
     return {
-        [PENDLE]: (await sdk.api.erc20.balanceOf({
+        [PENDLE]: await sdk.api.erc20.balanceOf({
             target: PENDLE,
             owner: SingleStaking,
             block
-        })).output
+        })
     }
 }
 
 module.exports = {
+    methodology: "Counts USDC and DAI earning yield on Compound/Aave and backing the yield tokens and USDC in the pendle markets. Staking TVL is just staked PENDLE on SingleStaking",
     tvl,
     staking:{
         tvl: staking
-    },
-    methodology: "Counts USDC and DAI earning yield on Compound/Aave and backing the yield tokens and USDC in the pendle markets. Staking TVL is just staked PENDLE on 0x07282F2CEEbD7a65451Fcd268b364300D9e6D7f5",
+    }
 }

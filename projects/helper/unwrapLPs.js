@@ -19,59 +19,13 @@ const crvPools = {
     '0xf2511b5e4fb0e5e2d123004b672ba14850478c14': {
         swapContract: '0x1B3771a66ee31180906972580adE9b81AFc5fCDc',
         underlyingTokens: ['0xe9e7cea3dedca5984780bafc599bd69add087d56', '0x55d398326f99059ff775485246999027b3197955', '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d'],
-    },
-    // 4USD Dopple LP
-    '0x9116f04092828390799514bac9986529d70c3791': {
-        swapContract: '0x5162f992EDF7101637446ecCcD5943A9dcC63A8A',
-        underlyingTokens: [
-            '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3',
-            '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
-            '0x55d398326f99059fF775485246999027B3197955',
-            '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d'
-        ],
-    },
-    // 2Pools Dopple LP
-    '0x124166103814e5a033869c88e0f40c61700fca17': {
-        swapContract: '0x449256e20ac3ed7F9AE81c2583068f7508d15c02',
-        underlyingTokens: [
-            '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
-            '0x55d398326f99059fF775485246999027B3197955'
-        ],
-    },
-    // UST Dopple LP
-    '0x7edcdc8cd062948ce9a9bc38c477e6aa244dd545': {
-        swapContract: '0x830e287ac5947B1C0DA865dfB3Afd7CdF7900464',
-        underlyingTokens: [
-            '0x23396cF899Ca06c4472205fC903bDB4de249D6fC',
-            '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
-            '0x55d398326f99059fF775485246999027B3197955'
-        ],
-    },
-    // DOLLY Dopple LP
-    '0xaa5509ce0ecea324bff504a46fc61eb75cb68b0c': {
-        swapContract: '0x61f864a7dFE66Cc818a4Fd0baabe845323D70454',
-        underlyingTokens: [
-            '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
-            '0x55d398326f99059fF775485246999027B3197955',
-            '0xfF54da7CAF3BC3D34664891fC8f3c9B6DeA6c7A5'
-        ],
-    },
-    // 3P QUANT LP
-    '0xb0f0983b32352a1cfaec143731ddd8a5f6e78b1f': {
-        swapContract: '0x3ED4b2070E3DB5eF5092F504145FB8150CfFE5Ea',
-        underlyingTokens: [
-            '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
-            '0x55d398326f99059fF775485246999027B3197955',
-            '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d'
-        ],
-    },
-    // am3CRV Polygon
+    },  // am3CRV Polygon
     "0xe7a24ef0c5e95ffb0f6684b813a78f2a3ad7d171": {
       swapContract: "0x445FE580eF8d70FF569aB36e80c647af338db351",
       underlyingTokens: [
-        "0x27F8D03b3a2196956ED754baDc28D73be8830A6e",
-        "0x1a13F4Ca1d028320A707D99520AbFefca3998b7F",
-        "0x60D55F02A771d515e077c9C2403a1ef324885CeC"
+        "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+        "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+        "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"
       ]
     },
     // sCRV Eth
@@ -112,26 +66,10 @@ const crvPools = {
         "0x853d955acef822db058eb8505911ed77f175b99e",
         "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490"
       ]
-    },
-    // seCRV Eth
-    "0xa3d87fffce63b53e0d54faa1cc983b7eb0b74a9c": {
-        swapContract: "0xc5424B857f758E906013F3555Dad202e4bdB4567",
-        underlyingTokens: ["0x5e74C9036fb86BD7eCdcb084a0673EFc32eA31cb"]
-    },
-    // btcCRV Polygon
-    "0xf8a57c1d3b9629b77b6726a042ca48990a84fb49": {
-        swapContract: "0xC2d95EEF97Ec6C17551d45e77B590dc1F9117C67",
-        underlyingTokens: [
-          "0x5c2ed810328349100A66B82b78a1791B101C9D61",
-          "0xDBf31dF14B66535aF65AaC99C32e9eA844e14501"
-        ]
-      },
+    }
 }
 
 async function unwrapCrv(balances, crvToken, balance3Crv, block, chain = "ethereum", transformAddress=(addr)=>addr) {
-    if(crvPools[crvToken.toLowerCase()] === undefined){
-        return
-    }
     const crvSwapContract = crvPools[crvToken.toLowerCase()].swapContract
     const underlyingTokens = crvPools[crvToken.toLowerCase()].underlyingTokens
     const crvTotalSupply = sdk.api.erc20.totalSupply({
@@ -149,10 +87,11 @@ async function unwrapCrv(balances, crvToken, balance3Crv, block, chain = "ethere
         abi: 'erc20:balanceOf'
     })).output
 
-    // steth and seth case where balanceOf not applicable on ETH balance
-    if (crvToken.toLowerCase() === "0x06325440d014e39736583c165c2963ba99faf14e" || crvToken.toLowerCase() === "0xa3d87fffce63b53e0d54faa1cc983b7eb0b74a9c") {
+    // steth case where balanceOf not applicable on ETH balance
+    if (crvToken === "0x06325440d014e39736583c165c2963ba99faf14e") {
         underlyingSwapTokens[0].output = underlyingSwapTokens[0].output * 2;
     }
+
     const resolvedCrvTotalSupply = (await crvTotalSupply).output
     underlyingSwapTokens.forEach(call => {
         const underlyingBalance = BigNumber(call.output).times(balance3Crv).div(resolvedCrvTotalSupply);
@@ -215,7 +154,6 @@ async function addBalanceOfTokensAndLPs(balances, balanceResult, block){
 }
 
 // Unwrap the tokens that are LPs and directly add the others
-// To be used when you don't know which tokens are LPs and which are not
 async function addTokensAndLPs(balances, tokens, amounts, block, chain = "ethereum", transformAddress=id=>id){
     const tokens0 = await sdk.api.abi.multiCall({
         calls:tokens.output.map(t=>({
@@ -249,7 +187,7 @@ tokens [
     [token, isLP] - eg ["0xaaa", true]
 ]
 */
-async function sumTokensAndLPsSharedOwners(balances, tokens, owners, block, chain = "ethereum", transformAddress=id=>id){
+async function sumTokensAndLPs(balances, tokens, owners, block, chain = "ethereum", transformAddress=id=>id){
     const balanceOfTokens = await sdk.api.abi.multiCall({
         calls: tokens.map(t=>owners.map(o=>({
             target: t[0],
@@ -264,37 +202,6 @@ async function sumTokensAndLPsSharedOwners(balances, tokens, owners, block, chai
         const token = result.input.target
         const balance = result.output
         if(tokens.find(t=>addressesEqual(t[0], token))[1]){
-            lpBalances.push({
-                token,
-                balance
-            })
-        } else {
-            sdk.util.sumSingleBalance(balances, transformAddress(token), balance);
-        }
-    })
-    await unwrapUniswapLPs(balances, lpBalances, block, chain, transformAddress)
-}
-
-/*
-tokens [
-    [token, owner, isLP] - eg ["0xaaa", "0xbbb", true]
-]
-*/
-async function sumTokensAndLPs(balances, tokens, block, chain = "ethereum", transformAddress=id=>id){
-    const balanceOfTokens = await sdk.api.abi.multiCall({
-        calls: tokens.map(t=>({
-            target: t[0],
-            params: t[1]
-        })),
-        abi: 'erc20:balanceOf',
-        block,
-        chain
-    })
-    const lpBalances = []
-    balanceOfTokens.output.forEach((result, idx)=>{
-        const token = result.input.target
-        const balance = result.output
-        if(tokens[idx][2]){
             lpBalances.push({
                 token,
                 balance
@@ -332,8 +239,7 @@ module.exports = {
     unwrapCrv,
     unwrapUniswapLPs,
     addTokensAndLPs,
-    sumTokensAndLPsSharedOwners,
-    addBalanceOfTokensAndLPs,
     sumTokensAndLPs,
+    addBalanceOfTokensAndLPs,
     sumTokens
 }
