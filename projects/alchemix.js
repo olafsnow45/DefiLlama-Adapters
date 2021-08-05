@@ -12,18 +12,32 @@ let coins = [
   "0xdBdb4d16EdA451D0503b854CF79D55697F90c8DF", //ALCX
   "0xC3f279090a47e80990Fe3a9c30d24Cb117EF91a8", //Sushiswap ALCX-WETH LP Token
   "0x19D3364A399d251E894aC732651be8B0E4e85001", //yvDAI
-  "0x43b4FdFD4Ff969587185cDB6f0BD875c5Fc83f8c" //Curve alUSD-3crv LP token
+  "0x43b4FdFD4Ff969587185cDB6f0BD875c5Fc83f8c", //Curve alUSD-3crv LP token
+
+  "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", //WETH
+  "0x0100546F2cD4C9D97f798fFC9755E47865FF7Ee6", //alETH
+  "0xa258C4606Ca8206D8aA700cE2143D7db854D168c"  //yvWETH
 ];
 
 let daiHolders = [
-  "0xaB7A49B971AFdc7Ee26255038C82b4006D122086", //Transmuter
-  "0xc21D353FF4ee73C572425697f4F5aaD2109fe35b", //Alchemist
-  "0xf3cFfaEEa177Db444b68FB6f033d4a82f6D8C82d" //TransmuterB
+  "0xaB7A49B971AFdc7Ee26255038C82b4006D122086", //USDTransmuter
+  "0xc21D353FF4ee73C572425697f4F5aaD2109fe35b", //USDAlchemist
+  "0xeE69BD81Bd056339368c97c4B2837B4Dc4b796E7" //USDTransmuterB
 ];
 
 let yvDaiHolders = [
-  "0x014dE182c147f8663589d77eAdB109Bf86958f13", //YearnVaultAdapter (Alchemist)
-  "0x491EAFC47D019B44e13Ef7cC649bbA51E15C61d7" //YearnVaultAdapterWithIndirection (TransmuterB)
+  "0xb039eA6153c827e59b620bDCd974F7bbFe68214A", //USDYearnVaultAdapter (Alchemist)
+  "0x6Fe02BE0EC79dCF582cBDB936D7037d2eB17F661" //USDYearnVaultAdapterWithIndirection (TransmuterB)
+];
+
+let wethHolders = [
+  "0x9FD9946E526357B35D95Bcb4b388614be4cFd4AC", //ETHTransmuter
+  "0xf8317BD5F48B6fE608a52B48C856D3367540B73B"  //ETHAlchemist
+];
+
+let yvWethHolders = [
+  "0x546E6711032Ec744A7708D4b7b283A210a85B3BC", //ETHYearnVaultAdapter (Alchemist)
+  "0x6d75657771256C7a8CB4d475fDf5047B70160132"  //ETHYearnVaultAdapter (Transmuter)
 ];
 
 async function weiToFloat(wei) {
@@ -67,7 +81,11 @@ async function fetch() {
   const yvDAIContract = new web3.eth.Contract(abis.abis.minYvV2, coins[4]);
   const curvelpcontract = new web3.eth.Contract(curveAbi, coins[5])
 
-  let pricePerShare = await getPricePerShareInFloat(yvDAIContract);
+  const wethcontract = new web3.eth.Contract(abis.abis.minABI, coins[6]);
+  const alethContract = new web3.eth.Contract(abis.abis.minABI,  coins[7]);
+  const yvWethContract = new web3.eth.Contract(abis.abis.minYvV2,  coins[8]);
+
+  let pricePerYvDai = await getPricePerShareInFloat(yvDAIContract);
 
   let tvl = 0;
 
@@ -80,8 +98,27 @@ async function fetch() {
   //Get total DAI TVL from yvDAI holders
   for (let i = 0; i < yvDaiHolders.length; i++) {
     let ydaibal = await getBalInFloat(yvDAIContract, yvDaiHolders[i]);
-    tvl += ydaibal * pricePerShare;
+    tvl += ydaibal * pricePerYvDai;
   }
+
+  const pricePerYvWeth = await getPricePerShareInFloat(yvWethContract);
+
+  let totalEth = 0;
+
+  // Get ETH TVL
+  //Get total ETH TVL from transmuter and alchemist contracts
+  for (let i = 0; i < wethHolders.length; i++) {
+    let ethbal = await getBalInFloat(wethcontract, wethHolders[i]);
+    totalEth += ethbal;
+  }
+  //Get total ETH TVL from yvWETH holders
+  for (let i = 0; i < yvWethHolders.length; i++) {
+    let yethbal = await getBalInFloat(yvWethContract, yvWethHolders[i]);
+    totalEth += yethbal * pricePerYvWeth;
+  }
+  //Convert ETH to USD Via coingecko
+  const ethPriceInUsd = await getTokenPriceCoinGecko("usd")("ethereum");
+  tvl += totalEth * ethPriceInUsd;
 
   //Get total amount of ALCX staked in staking pool
   const stakedALCX = await getBalInFloat(alcxcontract, stakingPool);
