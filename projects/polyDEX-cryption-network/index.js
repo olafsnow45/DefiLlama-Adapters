@@ -1,33 +1,34 @@
 const { request, gql } = require("graphql-request");
 const { toUSDTBalances } = require('../helper/balances');
 
-const graphUrl = 'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange'
+const graphUrl = 'https://api.thegraph.com/subgraphs/name/gulshancryption/cntexchange'
 const graphQuery = gql`
 query get_tvl($block: Int) {
-  uniswapFactories(
+    factories(
     block: { number: $block }
   ) {
-    totalVolumeUSD
-    totalLiquidityUSD
+    volumeUSD
+    liquidityUSD
   }
 }
 `;
 
 async function tvl(timestamp, block, chainBlocks) {
-  const {uniswapFactories} = await request(
+  const {factories} = await request(
     graphUrl,
     graphQuery,
     {
-      block: chainBlocks['bsc'],
+      block: chainBlocks['polygon'] - 60,
     }
   );
-  const usdTvl = Number(uniswapFactories[0].totalLiquidityUSD)
+  const usdTvl = Number(factories[0].liquidityUSD)
 
   return toUSDTBalances(usdTvl)
 }
 
 module.exports = {
-  bsc:{
+  misrepresentedTokens: true,
+  polygon:{
     tvl,
   },
   tvl
