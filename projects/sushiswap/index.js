@@ -65,7 +65,6 @@ async function heco(timestamp, ethBlock, chainBlocks) {
 // Missing: avax, harmony, okex
 
 module.exports = {
-  misrepresentedTokens: true,
   ethereum: {
     tvl: eth,
   },

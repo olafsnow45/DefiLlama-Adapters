@@ -22,12 +22,15 @@ async function bsc() {
 }
 
 async function fetch() {
-  return (await polygon())+(await bsc())
+  return (await polygon())+(await heco())+(await bsc())
 }
 
 module.exports = {
   bsc:{
     fetch:bsc
+  },
+  heco:{
+    fetch: heco
   },
   polygon:{
     fetch: polygon

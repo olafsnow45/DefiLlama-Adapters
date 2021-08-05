@@ -139,7 +139,6 @@ async function polygon(timestamp, ethBlock, chainBlock) {
 
 
 module.exports = {
-    misrepresentedTokens: true,
     bsc:{
         tvl: bsc
     },
