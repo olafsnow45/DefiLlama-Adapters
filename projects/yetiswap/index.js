@@ -33,7 +33,6 @@ async function tvl(timestamp, ethereumBlock, chainBlocks) {
 }
 
 module.exports = {
-  misrepresentedTokens: true,
   avalanche:{
     tvl,
   },

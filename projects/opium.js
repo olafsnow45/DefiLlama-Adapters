@@ -47,10 +47,12 @@ const tvl = (url, chain) => async (timestamp, blockETH, chainBlocks) => {
 
   // Sum all balances
   _.each(balanceOfResults.output, (balanceOf) => {
+    if(balanceOf.success) {
       const address = balanceOf.input.target;
       const balance = balances[address] ? BigNumber(balanceOf.output).plus(BigNumber(balances[address])).toFixed().toString(): balanceOf.output;
 
       balances[address] = balance;
+    }
   });
 
   // Iterate over final balances
@@ -86,7 +88,7 @@ const tvl = (url, chain) => async (timestamp, blockETH, chainBlocks) => {
   await unwrapUniswapLPs(
     balances,
     lpPositions,
-    chainBlocks[chain],
+    chain === CHAINS.ETHEREUM ? blockETH : chainBlocks[chain],
     chain
   )
 
