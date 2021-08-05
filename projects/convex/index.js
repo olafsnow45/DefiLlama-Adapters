@@ -111,8 +111,7 @@ async function tvl(timestamp, block) {
       }
       if(coinBalance.input.target === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"){
         coinBalance = await sdk.api.eth.getBalance({
-          target: coinBalance.input.params[0],
-          block
+          target: coinBalance.input.params[0]
         })
         coinAddress = '0x0000000000000000000000000000000000000000'
       }
