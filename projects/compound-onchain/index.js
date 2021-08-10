@@ -2,7 +2,6 @@ const _ = require('underscore');
 const sdk = require('@defillama/sdk');
 const abi = require('./abi.json');
 const BigNumber = require('bignumber.js');
-const {lendingMarket} = require('../helper/methodologies')
 
 // cache some data
 const markets = [
@@ -152,9 +151,5 @@ async function tvl(timestamp, block) {
 }
 
 module.exports = {
-  ethereum: {
-    tvl
-  },
-  methodology: `${lendingMarket}. TVL is calculated by getting the market addresses from comptroller and calling the getCash() on-chain method to get the amount of tokens locked in each of these addresses, then we get the price of each token from coingecko.`,
   tvl,
 };
