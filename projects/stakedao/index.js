@@ -36,7 +36,7 @@ const crv_eth_vault = {
 const crv_perpetual_vault = {
   contract: '0x52f541764E6e90eeBc5c21Ff570De0e2D63766B6',
   crvToken: '0x5f3b5DfEb7B28CDbD7FAba78963EE202a494e2A2',
-  abi: 'locked'
+  abi: 'balance'
 }
 
 // Polygon
@@ -71,11 +71,10 @@ const crvToken = '0xD533a949740bb3306d119CC777fa900bA034cd52'
 
 async function ethereum(timestamp, block) {
   let balances = {};
-  const crvInPerpetual = sdk.api.abi.call({
+  const crvInPerpetual = sdk.api.erc20.balanceOf({
     target: crv_perpetual_vault.crvToken,
-    block,
-    abi: abi[crv_perpetual_vault.abi],
-    params: crv_perpetual_vault.contract
+    owner: crv_perpetual_vault.contract,
+    block
   })
   await Promise.all(vaults.map(async vault=>{
     const crvBalance = await sdk.api.abi.call({
@@ -85,7 +84,7 @@ async function ethereum(timestamp, block) {
     })
     await unwrapCrv(balances, vault.crvToken, crvBalance.output, block)
   }))
-  sdk.util.sumSingleBalance(balances, crvToken, (await crvInPerpetual).output.amount)
+  sdk.util.sumSingleBalance(balances, crvToken, (await crvInPerpetual).output)
   return balances
 }
 
