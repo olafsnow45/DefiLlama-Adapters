@@ -2,20 +2,15 @@ const sdk = require('@defillama/sdk')
 const {unwrapUniswapLPs} = require('../helper/unwrapLPs')
 
 const bev = "0xc7dac962c166a26038ec4bc5d0e2a3fe0ff3ce58"
-const l1q = "0xf8d5c25a47d28866b4c1ce285f42997c690f941c"
 
 async function tvl(timestamp, block, chainBlocks) {
-  const balances = {}
-  for(const token of [bev, l1q]){
-    const supply = await sdk.api.erc20.totalSupply({
-        target: token,
+    const bevSupply = await sdk.api.erc20.totalSupply({
+        target: bev,
         block: chainBlocks.bsc,
         chain: 'bsc'
     })
-    balances['bsc:'+token]= supply.output
-  }
 
-  return balances
+  return { ['bsc:'+bev]: bevSupply.output };
 }
 
 const LPstaking = "0x986581a915f8abf4C8E21781a2c45FD4Eb21699D"
