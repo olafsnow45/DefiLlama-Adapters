@@ -10,6 +10,5 @@ async function fetch() {
 }
 
 module.exports = {
-  fetch,
-  methodology: `Wing Finance TVL is achieved by making calls to it's API: https://api.wing.finance/wing/governance/tvl.`
+  fetch
 }

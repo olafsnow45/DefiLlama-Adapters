@@ -1,4 +1,5 @@
 const { request, gql } = require("graphql-request");
+const sdk = require('@defillama/sdk');
 const { toUSDTBalances } = require('../helper/balances');
 const graphUrl = 'https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex'
 
@@ -8,7 +9,11 @@ query get_tvl($block: Int) {
     id: "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
     block: { number: $block }
   ) {
-    totalLiquidityUSD
+        totalLiquidityETH
+        totalLiquidityUSD
+  },
+  tokens(where: { id: "0xde3a24028580884448a5397872046a019649b084" }) {
+    derivedETH
   }
 }
 `;
@@ -22,11 +27,12 @@ async function tvl(timestamp, ethBlock, chainBlocks) {
     }
   );
 
-  return toUSDTBalances(Number(response.pangolinFactory.totalLiquidityUSD));
+  return {
+    'avalanche-2': Number(response.pangolinFactory.totalLiquidityETH)
+  }
 }
 
 module.exports = {
-  misrepresentedTokens: true,
   avalanche:{
     tvl,
   },

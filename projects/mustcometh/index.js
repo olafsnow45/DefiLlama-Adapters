@@ -32,7 +32,6 @@ async function tvl(timestamp) {
 }
 
 module.exports = {
-  misrepresentedTokens: true,
   name: 'MustCometh',
   token: 'MUST',
   category: 'Dexes',

@@ -392,7 +392,6 @@ async function tvlBSC(timestamp, ethBlock, chainBlocks) {
 }
 
 module.exports = {
-  misrepresentedTokens: true,
   ethereum:{
     tvl: ethTvl
   },

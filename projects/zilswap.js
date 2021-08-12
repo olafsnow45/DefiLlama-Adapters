@@ -6,6 +6,5 @@ async function fetch() {
 }
 
 module.exports = {
-  fetch,
-  methodology: `ZilSwap TVL is achieved by making a call to its API: https://api.zilstream.com/stats.`
+  fetch
 }

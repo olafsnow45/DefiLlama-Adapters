@@ -32,7 +32,6 @@ async function tvl(timestamp) {
 }
 
 module.exports = {
-  misrepresentedTokens: true,
   xdai: {
     tvl,
   },

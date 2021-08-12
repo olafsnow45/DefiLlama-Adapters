@@ -1,56 +1,56 @@
 {
-  "IronSwap": {
-    "getTokenBalances": {
-      "inputs": [],
-      "name": "getTokenBalances",
+  "poolUsdc": {
+    "info": {
+      "type": "function",
+      "stateMutability": "view",
       "outputs": [
         {
-          "internalType": "uint256[]",
+          "type": "uint256",
           "name": "",
-          "type": "uint256[]"
+          "internalType": "uint256"
+        },
+        {
+          "type": "uint256",
+          "name": "",
+          "internalType": "uint256"
+        },
+        {
+          "type": "uint256",
+          "name": "",
+          "internalType": "uint256"
+        },
+        {
+          "type": "bool",
+          "name": "",
+          "internalType": "bool"
+        },
+        {
+          "type": "bool",
+          "name": "",
+          "internalType": "bool"
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
+      "name": "info",
+      "inputs": []
     },
-    "getTokens": {
-      "inputs": [],
-      "name": "getTokens",
+    "collateral": {
+      "type": "function",
+      "stateMutability": "view",
       "outputs": [
         {
-          "internalType": "contract IERC20[]",
+          "type": "address",
           "name": "",
-          "type": "address[]"
+          "internalType": "address"
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
+      "name": "collateral",
+      "inputs": []
     }
   },
-
-  "IronController": {
-    "getAllMarkets": {
-      "constant": true,
+  "treasury": {
+    "globalCollateralBalance": {
       "inputs": [],
-      "name": "getAllMarkets",
-      "outputs": [
-        {
-          "internalType": "contract RToken[]",
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    }
-  },
-
-  "rToken": {
-    "getCash": {
-      "constant": true,
-      "inputs": [],
-      "name": "getCash",
+      "name": "globalCollateralBalance",
       "outputs": [
         {
           "internalType": "uint256",
@@ -58,39 +58,6 @@
           "type": "uint256"
         }
       ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-
-    "underlying": {
-      "constant": true,
-      "inputs": [],
-      "name": "underlying",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-
-    "symbol": {
-      "constant": true,
-      "inputs": [],
-      "name": "symbol",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "payable": false,
       "stateMutability": "view",
       "type": "function"
     }

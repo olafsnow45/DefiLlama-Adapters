@@ -43,7 +43,6 @@ function chainTvl(chain) {
 }
 
 module.exports = {
-  misrepresentedTokens: true,
   ethereum: {
     tvl: chainTvl('ethereum'),
   },

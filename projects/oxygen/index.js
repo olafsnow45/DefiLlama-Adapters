@@ -13,7 +13,6 @@ async function tvl() {
 }
 
 module.exports = {
-    misrepresentedTokens: true,
     solana: {
         tvl,
     },

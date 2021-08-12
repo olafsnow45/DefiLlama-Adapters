@@ -14,9 +14,6 @@ async function calculateUniTvl(getAddress, block, chain, FACTORY, START_BLOCK, u
       chain,
       block
     })).output
-    if(pairLength === null){
-      throw new Error("allPairsLength() failed")
-    }
     const pairNums = Array.from(Array(Number(pairLength)).keys())
     const pairs = (await sdk.api.abi.multiCall({
       abi: factoryAbi.allPairs,
