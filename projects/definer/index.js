@@ -31,8 +31,7 @@ const utility = {
   async getTokenRegistryAddressByGlobalConfig(block, chain) {
     return (
       await sdk.api.abi.call({
-        block: block,
-        chain: chain,
+        block,
         target: contracts[chain].GLOBAL_CONFIG_ADDRESS,
         params: [],
         abi: abi["global:tokenInfoRegistry"],
@@ -44,8 +43,7 @@ const utility = {
   async getBankAddressByGlobalConfig(block, chain) {
     return (
       await sdk.api.abi.call({
-        block: block,
-        chain: chain,
+        block,
         target: contracts[chain].GLOBAL_CONFIG_ADDRESS,
         params: [],
         abi: abi["global:bank"],
@@ -57,8 +55,7 @@ const utility = {
   async getTokenRegistryContract(block, ads, chain) {
     return (
       await sdk.api.abi.call({
-        block: block,
-        chain: chain,
+        block,
         target: ads,
         params: [],
         abi: abi["tokenRegistry:getTokens"],
@@ -92,8 +89,7 @@ const utility = {
     });
     return (
       await sdk.api.abi.multiCall({
-        block: block,
-        chain: chain,
+        block,
         abi: abi["bank:getPoolAmount"],
         calls: callsArray,
       })
@@ -111,8 +107,7 @@ const utility = {
     });
     return (
       await sdk.api.abi.multiCall({
-        block: block,
-        chain: chain,
+        block,
         abi: abi["bank:getTokenState"],
         calls: callsArray,
       })
@@ -122,11 +117,10 @@ const utility = {
   // Get Token Value
   async getCtokenValue(block, ctoken, chain) {
     let cEthToken = await sdk.api.abi.call({
-      block: block,
-      chain: chain,
       target: ctoken,
       params: contracts[chain].SAVINGS_ADDRESS,
       abi: "erc20:balanceOf",
+      block,
     });
     return cEthToken.output;
   },
@@ -142,8 +136,7 @@ const utility = {
     });
     return (
       await sdk.api.abi.multiCall({
-        block: block,
-        chain: chain,
+        block,
         abi: "erc20:symbol",
         calls: callsArray,
       })
@@ -165,8 +158,7 @@ const utility = {
     });
     let cToken = (
       await sdk.api.abi.multiCall({
-        block: block,
-        chain: chain,
+        block,
         abi: abi["tokenRegistry:getCToken"],
         calls: callsArray,
       })
@@ -205,8 +197,7 @@ const utility = {
     });
     let capitalUtilizationRatio = (
       await sdk.api.abi.multiCall({
-        block: block,
-        chain: chain,
+        block,
         abi: abi["bank:getCapitalUtilizationRatio"],
         calls: callsArray,
       })
@@ -250,8 +241,7 @@ const utility = {
 
     let supplyRatePerBlock = (
       await sdk.api.abi.multiCall({
-        block: block,
-        chain: chain,
+        block,
         abi: abi["ctoken:supplyRatePerBlock"],
         calls: callsCompArray,
       })
@@ -259,7 +249,7 @@ const utility = {
 
     let borrowRatePerBlock = (
       await sdk.api.abi.multiCall({
-        block: block,
+        block,
         abi: abi["ctoken:borrowRatePerBlock"],
         calls: callsCompArray,
       })
@@ -268,8 +258,7 @@ const utility = {
     // capitalCompoundRatioArray
     let getCapitalCompoundRatio = (
       await sdk.api.abi.multiCall({
-        block: block,
-        chain: chain,
+        block,
         abi: abi["bank:getCapitalCompoundRatio"],
         calls: capitalCompoundRatioArray,
       })
@@ -399,8 +388,8 @@ async function getTvlByChain(timestamp, block, chain) {
   let config = contracts[chain];
 
   let balances = {};
-  let networkAddressSymbol = chain === "ethereum" ? "" : `${chain}:`;
-  if (!block || block > config.DEPLOY_BLOCK) {
+
+  if (block > config.DEPLOY_BLOCK) {
     // Get all Tokens in the market
     let markets = await utility.getMarkets(block, chain);
 
@@ -410,14 +399,15 @@ async function getTvlByChain(timestamp, block, chain) {
       markets,
       chain
     );
+
     banksPoolAmounts.forEach((result) => {
       if (result.success === true) {
-        balances[networkAddressSymbol + result.input.params] = result.output;
+        balances[result.input.params] = result.output;
       }
     });
 
     // cETH value
-    balances[networkAddressSymbol + config.CETH] = await utility.getCtokenValue(
+    balances[config.CETH] = await utility.getCtokenValue(
       block,
       config.CETH,
       chain
