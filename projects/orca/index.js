@@ -30,7 +30,7 @@ async function tvl(){
 
     const pools = await axios.get(endpoint);
     Object.values(pools.data).forEach(pool=>{
-        const [_, tokenA, tokenB] = pool.poolId.match(/([A-Z-]+)\/([A-Z-]+)/)
+        const [tokenA, tokenB] = pool.poolId.split('/')
         addToBalance(balances, tokenA, pool.tokenAAmount)
         addToBalance(balances, tokenB, pool.tokenBAmount)
     })
@@ -42,3 +42,4 @@ async function tvl(){
 module.exports = {
     tvl
   }
+  
