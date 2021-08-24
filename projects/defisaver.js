@@ -148,7 +148,7 @@ const keys = [
   }
 ];
 
-let web3RpcUrl = process.env.ETHEREUM_RPC.split(',')[0];
+let web3RpcUrl = process.env.ETHEREUM_RPC;
 
 // Utils
 const aggregate = (calls) => Multicall.aggregate(
@@ -284,10 +284,7 @@ const getAaveData = async (contracts, prices) => {
 const getAaveV2Data = async (contracts, prices) => {
   const defaultMarket = '0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5'
   let aaveSubs = await contracts.aaveV2Subscriptions.methods.getSubscribers().call();
-  let subData = [];
-  for(let i=0; i<subData.length; i+=30){
-    subData = subData.concat(await contracts.aaveV2LoanInfo.methods.getLoanDataArr(defaultMarket, aaveSubs.map(s => s.user).slice(i,i+30)).call());
-  }
+  let subData = await contracts.aaveV2LoanInfo.methods.getLoanDataArr(defaultMarket, aaveSubs.map(s => s.user)).call();
   const activeSubs = subData.map((sub) => {
     let sumBorrowUsd = 0;
     let sumCollUsd = 0;

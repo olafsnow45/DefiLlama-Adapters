@@ -36,7 +36,6 @@ async function polygon(timestamp, ethBlock, chainBlocks) {
 
 module.exports = {
   misrepresentedTokens: true,
-  methodology: `Balancer TVL is pulled from the Balancer subgraph and includes deposits made to Balancer v1 and v2 liquidity pools.`,
   ethereum:{
     tvl: ethereum
   },
