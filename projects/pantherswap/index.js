@@ -12,8 +12,8 @@ const bscTvl = async (timestamp, ethBlock, chainBlocks) => {
 };
 
 module.exports = {
-  bsc: {
-    tvl: bscTvl,
-  },
-  tvl: sdk.util.sumChainTvls([bscTvl]),
-};
+
+  tvl: bscTvl,
+  
+  
+}
