@@ -4,8 +4,7 @@ const markets = [
     ["8UviNr47S8eL6J3WfDxMRa3hvLta1VDJwNWqsDgtN3Cv", "solana"],
     ["8SheGtsopRUDzdiD6v6BR9a6bqZ9QwywYQY99Fp5meNf", "usd-coin"],
     ["B7Lg4cJZHPLFaGdqfaAWG35KFFaEtBMmRAGf98kNaogt", "ethereum"],
-    ["4jkyJVWQm8NUkiJFJQx6ZJQhfKLGpeZsNrXoT4bAPrRv", "bitcoin"],
-    ["5suXmvdbKQ98VonxGCXqViuWRu8k4zgZRxndYKsH2fJg", "serum"]
+    ["4jkyJVWQm8NUkiJFJQx6ZJQhfKLGpeZsNrXoT4bAPrRv", "bitcoin"]
 ]
 
 async function tvl(){

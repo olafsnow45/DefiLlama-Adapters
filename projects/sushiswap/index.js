@@ -1,7 +1,7 @@
 const { request, gql } = require("graphql-request");
 const { toUSDTBalances } = require('../helper/balances');
 const { calculateUniTvl } = require('../helper/calculateUniTvl.js')
-const { transformFantomAddress, transformHarmonyAddress, fixHarmonyBalances } = require('../helper/portedTokens')
+const { transformFantomAddress, transformXdaiAddress } = require('../helper/portedTokens')
 const { getBlock } = require('../helper/getBlock')
 const sdk = require('@defillama/sdk')
 
@@ -48,19 +48,12 @@ async function fantom(timestamp, ethBlock, chainBlocks) {
 }
 
 async function xdai(timestamp, ethBlock, chainBlocks) {
-  return calculateUniTvl(addr=>`xdai:${addr}`, chainBlocks['xdai'], 'xdai', factory, 0, true);
+  const transform = await transformXdaiAddress()
+  return calculateUniTvl(transform, chainBlocks['xdai'], 'xdai', factory, 0, true);
 }
 
 async function bsc(timestamp, ethBlock, chainBlocks) {
   return calculateUniTvl(addr => `bsc:${addr}`, chainBlocks['bsc'], 'bsc', factory, 0, true);
-}
-
-async function harmony(timestamp, ethBlock, chainBlocks) {
-  const block = await getBlock(timestamp, 'harmony', chainBlocks);
-  const transform = await transformHarmonyAddress()
-  const balances = await calculateUniTvl(transform, block, 'harmony', factory, 0, true);
-  fixHarmonyBalances(balances)
-  return balances
 }
 
 // Not good support from coingecko
@@ -73,12 +66,6 @@ async function heco(timestamp, ethBlock, chainBlocks) {
 
 module.exports = {
   misrepresentedTokens: true,
-  xdai: {
-    tvl: xdai
-  },
-  harmony:{
-    tvl: harmony
-  },
   ethereum: {
     tvl: eth,
   },
@@ -91,8 +78,11 @@ module.exports = {
   bsc: {
     tvl: bsc
   },
+  xdai: {
+    tvl: xdai
+  },
   heco:{
     tvl: heco
   },
-  tvl: sdk.util.sumChainTvls([eth, polygon, fantom, bsc, xdai, heco, harmony])
+  tvl: sdk.util.sumChainTvls([eth, polygon, fantom, bsc, xdai, heco])
 }
