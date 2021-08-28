@@ -1,5 +1,6 @@
 const sdk = require('@defillama/sdk')
-const {transformXdaiAddress} = require('../helper/portedTokens')
+const {transformXdaiAddress, transformOptimismAddress} = require('../helper/portedTokens')
+const { getBlock } = require('../helper/getBlock')
 const { default: axios } = require('axios')
 
 function chainTvl(chain) {
@@ -8,12 +9,15 @@ function chainTvl(chain) {
         let transform = token =>`${chain}:${token}`
         if(chain === "xdai"){
             transform = await transformXdaiAddress()
+        } else if (chain === 'optimism'){
+            transform = await transformOptimismAddress()
         }
-        const tokens = await axios.get('https://raw.githubusercontent.com/hop-protocol/hop/develop/packages/core/build/addresses/mainnet.json')
+        const block = await getBlock(timestamp, chain, chainBlocks)
+        const tokens = await axios('https://raw.githubusercontent.com/hop-protocol/hop/develop/packages/core/build/addresses/mainnet.json')
         for (const tokenConstants of Object.values(tokens.data.bridges)) {
             const chainConstants = tokenConstants[chain]
             if (chainConstants === undefined) {
-                throw new Error("Chain doesn't exist")
+                continue
             }
 
             let token = chainConstants.l2CanonicalToken ?? chainConstants.l1CanonicalToken;
@@ -22,8 +26,8 @@ function chainTvl(chain) {
             const amount = await sdk.api.erc20.balanceOf({
                 target: token,
                 owner: bridge,
-                block: chainBlocks[chain],
-                chain: chain
+                block,
+                chain
             })
             sdk.util.sumSingleBalance(balances, await transform(token), amount.output)
         }
@@ -41,5 +45,8 @@ module.exports = {
     polygon: {
         tvl: chainTvl('polygon')
     },
-    tvl: sdk.util.sumChainTvls(['ethereum', 'xdai', 'polygon'].map(chainTvl))
+    optimism: {
+        tvl: chainTvl('optimism')
+    },
+    tvl: sdk.util.sumChainTvls(['ethereum', 'xdai', 'polygon', 'optimism'].map(chainTvl))
 }
