@@ -27,7 +27,6 @@ async function tvl(timestamp, ethBlock, chainBlocks) {
 
 module.exports = {
   misrepresentedTokens: true,
-  methodology: 'The Pangolin subgraph and the Pangolin factory contract address are used to obtain the balance held in every LP pair.',
   avalanche:{
     tvl,
   },
