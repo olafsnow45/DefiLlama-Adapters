@@ -28,11 +28,7 @@
 ##### Token address and ticker if any:
 
 
-##### Category (Yield/Dexes/Lending/Minting) *Please choose only one:
+##### Category (Yield/Dexes/Lending/Minting):
 
 
-##### Oracle used (Chainlink/Band/API3/TWAP):
-
-
-##### forkedFrom (Does your project originate from another project):
-
+##### [Optional] ETH addresss (to receive a LlamaPunk):
