@@ -20,10 +20,6 @@ const ethTokenPools = {
     'usdc': {
         'pool': '0x128647690C7733593aA3Dd149EeBC5e256E79217',
         'token': '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
-    },
-    'wbtc': {
-        'pool': '0x93948Aa8488F522d5b079AF84fe411FBCE476e9f',
-        'token': '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
     }
 }
 
@@ -49,10 +45,6 @@ const bscTokenPools = {
     'btcb': {
         'pool': '0x26d0E4707af1c1DAAd8e9BA21b99cDa7Fd24c40B',
         'token': '0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c'
-    },
-    'busd': {
-        'pool': '0x829ED2a2BeF8b72e648f92CBF01587C7E12e8c1e',
-        'token': '0xe9e7cea3dedca5984780bafc599bd69add087d56'
     }
 }
 
@@ -77,36 +69,21 @@ async function eth(timestamp, block) {
         owner: stakingPool,
         target: bfcAddr,
         block: ethBlock
-    });
-    sdk.util.sumSingleBalance(balances, bfcAddr, tokenStaked.output);
+      });
+      sdk.util.sumSingleBalance(balances, bfcAddr, tokenStaked.output);
 
     // eth tokens
-    sdk.util.sumMultiBalanceOf(balances, await sdk.api.abi.multiCall({
-        abi: 'erc20:balanceOf',
-        block: ethBlock,
-        calls: Object.values(ethTokenPools).map(tokenPool=>({
-            params: tokenPool.pool,
+    for (token in ethTokenPools) {
+        tokenPool = ethTokenPools[token];
+        let tokenLocked = await sdk.api.erc20.balanceOf({
+            owner: tokenPool.pool,
             target: tokenPool.token,
-        }))
-    }), true)
+            block: ethBlock
+          });
+          sdk.util.sumSingleBalance(balances, tokenPool.token, tokenLocked.output);
+    }
 
     return balances
-}
-
-const wbtc = "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
-async function bitcoin(timestamp, ethBlock) {
-    const tokenPool = {
-        'pool': '0x986Eb51E67e154901ff9B482835788B8f3054076',
-        'token': '0x4ca7a5Fb41660A9c5c31683B832A17f7f7457344'
-    }
-    let tokenLocked = await sdk.api.erc20.balanceOf({
-        owner: tokenPool.pool,
-        target: tokenPool.token,
-        block: ethBlock
-    });
-    return {
-        [wbtc]: tokenLocked.output
-    }
 }
 
 const wbnb = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c"
@@ -122,28 +99,26 @@ async function bsc(timestamp, block, chainBlocks) {
     })).output)
 
     // bsc tokens
-    sdk.util.sumMultiBalanceOf(balances, await sdk.api.abi.multiCall({
-        abi: 'erc20:balanceOf',
-        block: bscBlock,
-        chain: 'bsc',
-        calls: Object.values(bscTokenPools).map(tokenPool=>({
-            params: tokenPool.pool,
+    for (token in bscTokenPools) {
+        tokenPool = bscTokenPools[token];
+        let tokenLocked = await sdk.api.erc20.balanceOf({
+            owner: tokenPool.pool,
             target: tokenPool.token,
-        }))
-    }), true, getBSCAddress)
+            chain: 'bsc',
+            block: bscBlock
+          });
+          sdk.util.sumSingleBalance(balances, getBSCAddress(tokenPool.token), tokenLocked.output);
+    }
 
     return balances
 }
 
 module.exports = {
-    ethereum: {
+    ethereum:{
         tvl: eth
     },
-    bsc: {
+    bsc:{
         tvl: bsc
     },
-    bitcoin:{
-        tvl: bitcoin
-    },
-    tvl: sdk.util.sumChainTvls([bsc,eth, bitcoin]),
+  tvl: sdk.util.sumChainTvls([eth, bsc])
 }
