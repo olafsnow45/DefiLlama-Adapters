@@ -1,13 +1,11 @@
 const sdk = require('@defillama/sdk')
-const {transformAvaxAddress, fixAvaxBalances} = require('../helper/portedTokens')
-const {calculateUniTvl} = require('../helper/calculateUniTvl')
 
+/*
 async function tvl(timestamp, ethBlock, chainBlocks){
-  const trans = await transformAvaxAddress()
-  const balances = calculateUniTvl(trans, chainBlocks.avax, 'avax', '0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10', 0, true)
-  fixAvaxBalances(balances)
-  return balances
+  const a = await transformAvaxAddress()
+    return calculateUniTvl(a, chainBlocks.avax, 'avax', '0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10', 0, true)
 }
+*/
 
 const { getChainTvl } = require('../helper/getUniSubgraphTvl');
 const joeBar = "0x57319d41F71E81F3c65F2a47CA4e001EbAFd4F33"
@@ -36,5 +34,5 @@ module.exports = {
   staking: {
     tvl: stakingTvl,
   },
-  tvl,
+  tvl: chainTvl('avax'),
 }
