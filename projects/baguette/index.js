@@ -1,6 +1,30 @@
-const { getAvaxUniswapTvl } = require("../helper/getUniSubgraphTvl")
+const { request, gql } = require("graphql-request");
 
-const tvl = getAvaxUniswapTvl('https://api.thegraph.com/subgraphs/name/baguette-exchange/baguette', 'baguetteFactories')
+const graphUrl = 'https://api.thegraph.com/subgraphs/name/baguette-exchange/baguette'
+
+const graphQuery = gql`
+query get_tvl($block: Int) {
+  baguetteFactories(
+    block: { number: $block }
+  ) {
+        totalLiquidityETH
+  }
+}
+`;
+
+async function tvl(timestamp, ethBlock, chainBlocks) {
+  const response = await request(
+    graphUrl,
+    graphQuery,
+    {
+      block:chainBlocks.avax,
+    }
+  );
+
+  return {
+    'avalanche-2': Number(response.baguetteFactories[0].totalLiquidityETH)
+  }
+}
 
 module.exports = {
   misrepresentedTokens: true,

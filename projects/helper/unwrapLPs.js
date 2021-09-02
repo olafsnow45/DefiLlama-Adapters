@@ -272,9 +272,7 @@ async function sumTokensAndLPsSharedOwners(balances, tokens, owners, block, chai
             sdk.util.sumSingleBalance(balances, transformAddress(token), balance);
         }
     })
-    if(lpBalances.length > 0){
-        await unwrapUniswapLPs(balances, lpBalances, block, chain, transformAddress)
-    }
+    await unwrapUniswapLPs(balances, lpBalances, block, chain, transformAddress)
 }
 
 /*

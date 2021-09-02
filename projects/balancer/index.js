@@ -1,8 +1,7 @@
 const sdk = require('@defillama/sdk');
 const BigNumber = require("bignumber.js");
-const { GraphQLClient, gql } = require('graphql-request')
 const { toUSDTBalances } = require('../helper/balances');
-const { getBlock } = require('../helper/getBlock');
+const { GraphQLClient, gql } = require('graphql-request')
 
 async function getTVL(subgraphName, block) {
   var endpoint = `https://api.thegraph.com/subgraphs/name/balancer-labs/${subgraphName}`
@@ -32,24 +31,16 @@ async function ethereum(timestamp, ethBlock) {
 }
 
 async function polygon(timestamp, ethBlock, chainBlocks) {
-  return toUSDTBalances(await getTVL("balancer-polygon-v2", await getBlock(timestamp, "polygon", chainBlocks)))
-}
-
-async function arbitrum(timestamp, ethBlock, chainBlocks) {
-  return toUSDTBalances(await getTVL("balancer-arbitrum-v2", await getBlock(timestamp, "arbitrum", chainBlocks)))
+  return toUSDTBalances(await getTVL("balancer-polygon-v2", chainBlocks.polygon))
 }
 
 module.exports = {
   misrepresentedTokens: true,
-  methodology: `Balancer TVL is pulled from the Balancer subgraph and includes deposits made to Balancer v1 and v2 liquidity pools.`,
   ethereum:{
     tvl: ethereum
   },
   polygon:{
     tvl: polygon
   },
-  arbitrum:{
-    tvl: arbitrum
-  },
-  tvl: sdk.util.sumChainTvls([ethereum, polygon, arbitrum])
+  tvl: sdk.util.sumChainTvls([ethereum, polygon])
 }
