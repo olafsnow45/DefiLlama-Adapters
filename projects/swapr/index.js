@@ -1,21 +1,20 @@
 const { request, gql } = require("graphql-request");
 const sdk = require("@defillama/sdk");
 const { toUSDTBalances, usdtAddress } = require("../helper/balances");
-const { getBlock } = require("../helper/getBlock");
+const { default: BigNumber } = require("bignumber.js");
 
-const SUBGRAPH_NAME = Object.freeze({
-  ethereum: "swapr-mainnet-alpha",
-  xdai: "swapr-xdai",
-  arbitrum: "swapr-arbitrum-one",
-});
+const graphUrl = {
+  ethereum:
+    "https://api.thegraph.com/subgraphs/name/luzzif/swapr-mainnet-alpha",
+  xdai: "https://api.thegraph.com/subgraphs/name/luzzif/swapr-xdai",
+};
 
-const FACTORY_ADDRESS = Object.freeze({
+const factoryAddress = {
   ethereum: "0xd34971BaB6E5E356fd250715F5dE0492BB070452",
   xdai: "0x5d48c95adffd4b40c1aaadc4e08fc44117e02179",
-  arbitrum: "0xbf9173b60a30b9ff8c37cac787b6ee87d5e47916",
-});
+};
 
-const QUERY = gql`
+const graphQuery = gql`
   query getTvl($block: Int, $factory: ID) {
     swaprFactory(id: $factory, block: { number: $block }) {
       totalLiquidityUSD
@@ -24,35 +23,40 @@ const QUERY = gql`
 `;
 
 async function getTvl(timestamp) {
-  const { swaprFactory } = await request(
-    `https://api.thegraph.com/subgraphs/name/luzzif/${
-      SUBGRAPH_NAME[this.chain]
-    }`,
-    QUERY,
-    {
-      block: await getBlock(timestamp, this.chain, {}),
-      factory: FACTORY_ADDRESS[this.chain],
-    }
-  );
+  const { block } = await sdk.api.util.lookupBlock(timestamp, {
+    chain: this.chain,
+  });
+  const { swaprFactory } = await request(graphUrl[this.chain], graphQuery, {
+    block,
+    factory: factoryAddress[this.chain],
+  });
   return toUSDTBalances(Number(swaprFactory.totalLiquidityUSD));
 }
 
-const xDaiTvl = getTvl.bind({ chain: "xdai" });
-const ethereumTvl = getTvl.bind({ chain: "ethereum" });
-const arbitrumTvl = getTvl.bind({ chain: "arbitrum" });
+async function tvl(timestamp) {
+  const balances = await Promise.all([
+    getTvl.call({ chain: "ethereum" }, timestamp),
+    getTvl.call({ chain: "xdai" }, timestamp),
+  ]);
+  return {
+    [usdtAddress]: balances
+      .reduce(
+        (tvl, balance) => tvl.plus(balance[usdtAddress]),
+        new BigNumber(0)
+      )
+      .toFixed(0),
+  };
+}
 
 module.exports = {
   misrepresentedTokens: true,
   xdai: {
-    tvl: xDaiTvl,
+    tvl: getTvl.bind({ chain: "xdai" }),
   },
   ethereum: {
-    tvl: ethereumTvl,
+    tvl: getTvl.bind({ chain: "ethereum" }),
   },
-  arbitrum: {
-    tvl: arbitrumTvl,
-  },
-  tvl: sdk.util.sumChainTvls([ethereumTvl, xDaiTvl, arbitrumTvl]),
+  tvl,
   name: "Swapr",
   category: "dexes",
 };

@@ -1,6 +1,5 @@
 const { request, gql } = require("graphql-request");
 const { toUSDTBalances } = require('../helper/balances');
-const { getBlock } = require('../helper/getBlock');
 const sdk = require('@defillama/sdk')
 
 function getChainTvl(graphUrls, factoriesName = "uniswapFactories", tvlName = "totalLiquidityUSD") {
@@ -15,7 +14,14 @@ query get_tvl($block: Int) {
 `;
     return (chain) => {
         return async (timestamp, ethBlock, chainBlocks) => {
-            const block = await getBlock(timestamp, chain, chainBlocks)
+            let block;
+            if (chain === "ethereum") {
+                block = ethBlock;
+            }
+            block = chainBlocks[chain]
+            if (block === undefined) {
+                block = (await sdk.api.util.lookupBlock(timestamp, { chain })).block
+            }
             const uniswapFactories = (await request(
                 graphUrls[chain],
                 graphQuery,

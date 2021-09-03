@@ -86,19 +86,5 @@
       "payable": false,
       "stateMutability": "view",
       "type": "function"
-    },
-    "oracle":
-    {
-      "inputs": [],
-      "name": "oracle",
-      "outputs": [
-        {
-          "internalType": "contract IPriceOracle",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
     }
 }

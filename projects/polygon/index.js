@@ -21,6 +21,9 @@ async function tvl(_, block) {
 
     // -- Attempt to calculate TVL from mapped POS tokens
     const posTokens = [{ target: maticToken, params: stakeManager }]
+
+    try {
+
         // Attempt to read list of all mapped ERC20 token addresses
         // via POS bridge
         const resp = await axios.get(PoSMappedTokenList)
@@ -34,9 +37,11 @@ async function tvl(_, block) {
                     params: posERC20Predicate
                 }
 
-            }).filter(t=>t.target !== "0x7ebaa895e524d5646e7a5b686c47989b3b17aa5f"))
+            }))
 
         }
+
+    } catch (e) { }
 
     const lockedPoSBalances = await sdk.api.abi.multiCall({
         calls: posTokens,
@@ -50,13 +55,15 @@ async function tvl(_, block) {
     // -- Attempt to calculate TVL from mapped Plasma tokens
     const plasmaTokens = []
 
+    try {
+
         // Attempt to read list of all mapped ERC20 token addresses
         // via Plasma bridge
-        const respPlasma = await axios.get(PlasmaMappedTokenList)
+        const resp = await axios.get(PlasmaMappedTokenList)
 
-        if (respPlasma.status == 200 && respPlasma.data.status == 1) {
+        if (resp.status == 200 && resp.data.status == 1) {
 
-            plasmaTokens.push(...respPlasma.data.tokens.map(v => {
+            plasmaTokens.push(...resp.data.tokens.map(v => {
 
                 return {
                     target: v.rootToken,
@@ -66,6 +73,8 @@ async function tvl(_, block) {
             }))
 
         }
+
+    } catch (e) { }
 
     const lockedPlasmaBalances = await sdk.api.abi.multiCall({
         calls: plasmaTokens,
@@ -88,6 +97,10 @@ async function tvl(_, block) {
 }
 
 module.exports = {
+    name: 'Polygon',
+    website: 'https://polygon.technology/',
+    token: 'MATIC',
+    category: 'payments',
     start: 1590824836, // Sat May 30 13:17:16 2020
     tvl
 }
