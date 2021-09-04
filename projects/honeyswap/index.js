@@ -1,35 +1,40 @@
-const sdk = require('@defillama/sdk');
-const BigNumber = require("bignumber.js");
 const { request, gql } = require("graphql-request");
-const { toUSDT, toUSDTBalances } = require('../helper/balances');
+const sdk = require('@defillama/sdk');
+const { toUSDTBalances } = require('../helper/balances');
 
-const xdaiGraphUrl = 'https://api.thegraph.com/subgraphs/name/1hive/honeyswap-xdai'
-const polygonGraphUrl = 'https://api.thegraph.com/subgraphs/name/1hive/honeyswap-polygon'
+const graphUrl = 'https://api.thegraph.com/subgraphs/name/1hive/honeyswap-v2'
 const graphQuery = gql`
-{
-  honeyswapFactories(first: 1) {
+query get_tvl($block: Int) {
+  uniswapFactory(
+    id: "0xa818b4f111ccac7aa31d0bcc0806d64f2e0737d7",
+    block: { number: $block }
+  ) {
+    totalVolumeUSD
     totalLiquidityUSD
   }
 }
-`
+`;
 
-async function xdaiTvl() {
-  const { honeyswapFactories } = await request(xdaiGraphUrl, graphQuery)
-  return toUSDTBalances(honeyswapFactories[0]['totalLiquidityUSD'])
-}
+async function tvl(timestamp) {
+  const { block } = await sdk.api.util.lookupBlock(timestamp, {
+    chain: 'xdai'
+  })
+  const {uniswapFactory} = await request(
+    graphUrl,
+    graphQuery,
+    {
+      block,
+    }
+  );
+  const usdTvl = Number(uniswapFactory.totalLiquidityUSD)
 
-async function polygonTvl() {
-  const { honeyswapFactories } = await request(polygonGraphUrl, graphQuery)
-  return toUSDTBalances(honeyswapFactories[0]['totalLiquidityUSD'])
+  return toUSDTBalances(usdTvl)
 }
 
 module.exports = {
   misrepresentedTokens: true,
   xdai: {
-    tvl: xdaiTvl
+    tvl,
   },
-  polygon: {
-    tvl: polygonTvl
-  },
-  tvl: sdk.util.sumChainTvls([xdaiTvl, polygonTvl])
+  tvl
 }
