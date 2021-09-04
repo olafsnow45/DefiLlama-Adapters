@@ -22,7 +22,7 @@
 ##### Coinmarketcap ID (so your TVL can appear on Coinmarketcap): (https://api.coinmarketcap.com/data-api/v3/map/all?listing_status=active,inactive,untracked&start=1&limit=10000)
 
 
-##### Short Description (to be shown on DefiLlama):
+##### Description/bio (to be shown on DefiLlama):
 
 
 ##### Token address and ticker if any:
