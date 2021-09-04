@@ -1,15 +1,5 @@
 const axios = require('axios')
 
-async function getTokenSupply(token) {
-    const tokenSupply = await axios.post("https://api.mainnet-beta.solana.com", {
-        "jsonrpc": "2.0",
-        "id": 1,
-        "method": "getTokenSupply",
-        "params": [token]
-    })
-    return tokenSupply.data.result.value.uiAmount
-}
-
 async function getTokenBalance(token, account) {
     const tokenBalance = await axios.post("https://api.mainnet-beta.solana.com", {
         "jsonrpc": "2.0",
@@ -91,7 +81,6 @@ async function getMultipleAccountBuffers(labeledAddresses) {
 }
 
 module.exports = {
-    getTokenSupply,
     getTokenBalance,
     getTokenAccountBalance,
     sumTokens,
