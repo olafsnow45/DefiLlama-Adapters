@@ -116,14 +116,12 @@ async function polygonTVL(timestamp, block) {
       delete balances[prefixedTokenAddress]
     }
   }
-
   await unwrapUniswapLPs(balances, lpPositions, block, 'polygon', (address) => 'polygon:' + address)
 
-   // Workaround for rUSD (price not being found)
-   // add rUSD balance to DAI balance, both are stablecoin so value should approximately be the same
-  const DAI = 'polygon:0x8f3cf7ad23cd3cadbd9735aff958023239c6a063'
+  // Workaround for rUSD (price not being found)
+  // Use coingecko id
   const rUSD = 'polygon:0xfc40a4f89b410a1b855b5e205064a38fc29f5eb5'
-  balances[DAI] =  BigNumber(balances[DAI]).plus(BigNumber(balances[rUSD])).toFixed(0)
+  balances['RUSD'] = parseFloat(balances[rUSD])  / (10 ** 18)
   delete balances[rUSD]
 
   return balances
